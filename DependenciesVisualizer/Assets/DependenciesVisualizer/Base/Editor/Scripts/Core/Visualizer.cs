@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using Object = System.Object;
 
-namespace ArchitectureVisualizer.Base.Editor.Scripts {
+namespace DependenciesVisualizer.Base.Editor.Scripts.Core {
     public class Visualizer
     {
         public List<string> FindAssets() {
