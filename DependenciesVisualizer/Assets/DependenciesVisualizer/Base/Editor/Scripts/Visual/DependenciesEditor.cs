@@ -111,7 +111,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
         private void ModifyNode(Event e) {
             var menu = new GenericMenu();
             menu.AddItem(new GUIContent("Delete"), false, ContextCallback, UserActions.DeleteNode);
-            menu.AddItem(new GUIContent("Undo"), false, ContextCallback, UserActions.UndoLastAction);
+            if (_oldCommands.Count == 0) {
+                menu.AddDisabledItem(new GUIContent("Undo"), false);
+            } else {
+                menu.AddItem(new GUIContent("Undo"), false, ContextCallback, UserActions.UndoLastAction);
+            }
+
             menu.ShowAsContext();
             e.Use();
         }
@@ -148,7 +153,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
         }
 
         private void UndoLastAction() {
-            if (_oldCommands.Peek() is null) {
+            if (_oldCommands.Count == 0) {
                 return;
             }
             
