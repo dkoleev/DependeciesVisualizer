@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.Core;
 using DependenciesVisualizer.Base.Editor.Scripts.Visual.Nodes;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
@@ -22,12 +24,13 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
             _editor.titleContent = new GUIContent("Dependencies Visualizer");
             _editor.minSize = new Vector2(800, 600);
             _editor.Show();
+            Init();
         }
 
-        private void OnEnable() {
-            _visualizer = new Visualizer();
+        private static void Init() {
+           // _visualizer = new Visualizer();
             _nodes.Clear();
-            var assemblies = _visualizer.GetAssemblies();
+            var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.Player).ToList();
             var nodePositionOffset = new Vector2(50, 50);
             foreach (var assembly in assemblies) {
                 var newNode = new StateNode(assembly, nodePositionOffset, BaseNode.DefaultSize, assembly.name);
@@ -38,6 +41,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
                     nodePositionOffset = new Vector2(50, BaseNode.DefaultSize.y + 50);
                 }
             }
+        }
+
+        private void OnEnable() {
+          
         }
 
         private void OnGUI() {
@@ -65,6 +72,29 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
             }
         }
 
+        public static void DrawNodeCurve(Rect start, Rect end, bool left, Color curveColor) {
+            var startPos = new Vector3(
+                left ? start.x + start.width : start.x,
+                start.y + start.height * 0.5f,
+                0
+            );
+            var endPos = new Vector3(
+                end.x + end.width * 0.5f,
+                end.y + end.height * 0.5f,
+                0
+                );
+
+            var startTan = startPos + Vector3.right * 50;
+            var endTan = endPos + Vector3.left * 50;
+            
+            var shadow = new Color(0,0,0,0.006f);
+            for (var i = 1; i < 4; i++) {
+                Handles.DrawBezier(startPos, endPos, startTan, endTan, shadow, null, i*0.5f);
+            }
+            
+            Handles.DrawBezier(startPos, endPos, startTan, endTan, curveColor, null, 1);
+        }
+
         private void UserInput(Event e) {
             if (e.type == EventType.MouseDown && !_makeTransition) {
                 switch (e.button) {
@@ -79,6 +109,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
 
             void RightClick() {
                 _selectedNode = null;
+                _clickedOnWindow = false;
                 foreach (var node in _nodes) {
                     if (node.WindowRect.Contains(e.mousePosition)) {
                         _clickedOnWindow = true;
@@ -110,6 +141,16 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
 
         private void ModifyNode(Event e) {
             var menu = new GenericMenu();
+
+            if (_selectedNode is StateNode stateNode) {
+                var addTransitionName = "Add transition";
+                if (stateNode.CurrentState is null) {
+                    menu.AddDisabledItem(new GUIContent(addTransitionName));
+                } else {
+                    menu.AddItem(new GUIContent(addTransitionName), false, ContextCallback, UserActions.AddTransitionNode);
+                }
+            }
+
             menu.AddItem(new GUIContent("Delete"), false, ContextCallback, UserActions.DeleteNode);
             if (_oldCommands.Count == 0) {
                 menu.AddDisabledItem(new GUIContent("Undo"), false);
@@ -129,7 +170,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
                    // _nodes.Add(node);
                     break;
                 case UserActions.CommentNode:
-                    var node = new StateNode(null, _mousePosition, BaseNode.DefaultSize, "Comment");
+                    var node = new CommentNode(null, _mousePosition, BaseNode.DefaultSize, "Comment");
                      _nodes.Add(node);
                     break;
                 case UserActions.DeleteNode:
@@ -138,12 +179,33 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
                     }
                     break;
                 case UserActions.AddTransitionNode:
-
+                    if (_selectedNode is StateNode stateNode) {
+                        var transition = stateNode.AddTransition();
+                        AddTransitionNode(stateNode.CurrentState.Transitions.Count, transition, stateNode);
+                    }
                     break;
                 case UserActions.UndoLastAction:
                     UndoLastAction();
                     break;
             }
+        }
+
+        private static TransitionNode AddTransitionNode(int index, Transition transition, StateNode from) {
+            var fromRect = from.WindowRect;
+            fromRect.x += 50;
+            var targetY = fromRect.y - fromRect.height;
+            if (!(from.CurrentState is null)) {
+                targetY += index * 100;
+            }
+
+            fromRect.y = targetY;
+            var transitionNode = CreateInstance<TransitionNode>();
+            transitionNode.Init(from, transition);
+            transitionNode.WindowRect = new Rect(fromRect.x + 200 + 100, fromRect.y + (fromRect.height * 0.7f), 200, 80);
+            transitionNode.WindowTitle = "Condition check";
+            _nodes.Add(transitionNode);
+
+            return transitionNode;
         }
 
         private void RemoveNode(BaseNode node) {
