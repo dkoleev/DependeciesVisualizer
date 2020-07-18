@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.Core;
 using DependenciesVisualizer.Base.Editor.Scripts.Visual.Nodes;
 using UnityEditor;
@@ -7,38 +7,35 @@ using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
     public class DependenciesEditor : EditorWindow {
-        [MenuItem("Dependencies Visualizer/Open")]
-        public static void Open() {
-            var editor = (DependenciesEditor) GetWindow(typeof(DependenciesEditor));
-            editor.titleContent = new GUIContent("Dependencies Visualizer");
-            editor.minSize = new Vector2(800, 600);
-            editor.Show();
-        }
-
+        private  static DependenciesEditor _editor;
         private Visualizer _visualizer;
         private static List<BaseNode> _nodes = new List<BaseNode>();
         private Vector3 _mousePosition;
         private bool _makeTransition;
         private bool _clickedOnWindow;
         private BaseNode _selectedNode;
+        private Stack<ICommand> _oldCommands = new Stack<ICommand>();
+        
+        [MenuItem("Dependencies Visualizer/Open")]
+        public static void Open() {
+            _editor = (DependenciesEditor) GetWindow(typeof(DependenciesEditor));
+            _editor.titleContent = new GUIContent("Dependencies Visualizer");
+            _editor.minSize = new Vector2(800, 600);
+            _editor.Show();
+        }
 
         private void OnEnable() {
             _visualizer = new Visualizer();
             _nodes.Clear();
             var assemblies = _visualizer.GetAssemblies();
-
-            var resString = string.Empty;
+            var nodePositionOffset = new Vector2(50, 50);
             foreach (var assembly in assemblies) {
-                resString += assembly.name + "\n";
-                foreach (var reference in assembly.assemblyReferences) {
-                    resString += $"    -> {reference.name}\n";
-                }
-                resString += "------------------------------------- \n";
-            }
-            Debug.LogError(resString);
-
-            foreach (var assembly in assemblies) {
-                foreach (var reference in assembly.assemblyReferences) {
+                var newNode = new StateNode(assembly, nodePositionOffset, BaseNode.DefaultSize, assembly.name);
+                _nodes.Add(newNode);
+                
+                nodePositionOffset = new Vector2(nodePositionOffset.x + BaseNode.DefaultSize.x + 50, nodePositionOffset.y);
+                if (nodePositionOffset.x > _editor.minSize.x) {
+                    nodePositionOffset = new Vector2(50, BaseNode.DefaultSize.y + 50);
                 }
             }
         }
@@ -58,7 +55,6 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
 
             for (var i = 0; i < _nodes.Count; i++) {
                 _nodes[i].WindowRect = GUI.Window(i, _nodes[i].WindowRect, DrawNodeWindow, _nodes[i].WindowTitle);
-                Debug.Log("draw " + i + "; " + _nodes[i].WindowRect);
             }
 
             EndWindows();
@@ -94,7 +90,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
                 if (_clickedOnWindow) {
                     ModifyNode(e);
                 } else {
-                    AddNewNode(e);
+                    NodeContextMenu(e);
                 }
             }
 
@@ -103,9 +99,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
             }
         }
 
-        private void AddNewNode(Event e) {
+        private void NodeContextMenu(Event e) {
             var menu = new GenericMenu();
-            menu.AddSeparator("");
+         //   menu.AddSeparator("");
             menu.AddItem(new GUIContent("Add state"), false, ContextCallback,UserActions.AddState);
             menu.AddItem(new GUIContent("Add comment"), false, ContextCallback, UserActions.CommentNode);
             menu.ShowAsContext();
@@ -113,29 +109,50 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
         }
 
         private void ModifyNode(Event e) {
-            
+            var menu = new GenericMenu();
+            menu.AddItem(new GUIContent("Delete"), false, ContextCallback, UserActions.DeleteNode);
+            menu.AddItem(new GUIContent("Undo"), false, ContextCallback, UserActions.UndoLastAction);
+            menu.ShowAsContext();
+            e.Use();
         }
 
         private void ContextCallback(object o) {
             var action = (UserActions) o;
             switch (action) {
                 case UserActions.AddState:
-                    var node = new StateNode {
-                        WindowRect = new Rect(_mousePosition.x, _mousePosition.y, 150, 250),
-                        WindowTitle = "State"
-                    };
-                    _nodes.Add(node);
+                    //var node = new StateNode(_mousePosition, BaseNode.DefaultSize, "State");
+                   // _nodes.Add(node);
                     break;
                 case UserActions.CommentNode:
-
+                    var node = new StateNode(null, _mousePosition, BaseNode.DefaultSize, "Comment");
+                     _nodes.Add(node);
                     break;
                 case UserActions.DeleteNode:
-
+                    if (_selectedNode != null) {
+                        RemoveNode(_selectedNode);
+                    }
                     break;
                 case UserActions.AddTransitionNode:
 
                     break;
+                case UserActions.UndoLastAction:
+                    UndoLastAction();
+                    break;
             }
+        }
+
+        private void RemoveNode(BaseNode node) {
+            var command = new DeleteAssemblyCommand(node, _nodes);
+            command.Execute();
+            _oldCommands.Push(command);
+        }
+
+        private void UndoLastAction() {
+            if (_oldCommands.Peek() is null) {
+                return;
+            }
+            
+            _oldCommands.Pop().Undo();
         }
 
         private void OnDisable() {

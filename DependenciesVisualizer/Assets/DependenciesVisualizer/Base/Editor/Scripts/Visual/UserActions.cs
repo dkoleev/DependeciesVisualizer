@@ -3,6 +3,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Visual {
         AddState,
         AddTransitionNode,
         DeleteNode,
-        CommentNode
+        CommentNode,
+        UndoLastAction
     }
 }
