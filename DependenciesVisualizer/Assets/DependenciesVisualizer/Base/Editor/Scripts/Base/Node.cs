@@ -9,18 +9,43 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         public Rect WindowRect { get; private set; }
 
         public Assembly Assembly { get; }
-        private IList<Node> _references;
+        private IList<Node> _inputDependencies;
+        private IList<Node> _outputDependencies;
         private static Vector2 _defaultSize = new Vector2(250, 100);
         private readonly string _windowTitle;
+        private NodeVisual _mainVisual;
+        private NodeVisual _cycleDependentVisual;
 
         public Node(Assembly assembly, Vector2 position) {
             Assembly = assembly;
             WindowRect = new Rect(position, _defaultSize);
             _windowTitle = Assembly.name;
+            
+            _mainVisual = new NodeVisual {
+                LineColor = new Color32(90, 145, 60, 255),
+                LineShadowColor = new Color32(50,55,35,255)
+            };
+            
+            _cycleDependentVisual = new NodeVisual {
+                LineColor = new Color32(150, 45, 45, 255),
+                LineShadowColor = new Color32(70,15,15,255)
+            };
         }
 
-        public void InjectReferences(IList<Node> references) {
-            _references = references;
+        public void InjectInputReferences(IList<Node> references) {
+            _inputDependencies = references;
+        }
+        
+        public void InjectOutputReferences(IList<Node> references) {
+            _outputDependencies = references;
+        }
+        
+        public bool IsInput(Node node) {
+            return _inputDependencies.Contains(node);
+        }
+        
+        public bool IsOutput(Node node) {
+            return _outputDependencies.Contains(node);
         }
         
         public bool IsDependent(Node node) {
@@ -36,12 +61,13 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         }
 
         public void DrawInputReferences() {
-            foreach (var reference in _references) {
-                DrawCurveReferences(WindowRect, reference.WindowRect, true, new Color32(100, 130,80, 255));
+            foreach (var reference in _inputDependencies) {
+                var isCycleDependent = IsOutput(reference);
+                DrawCurveReferences(WindowRect, reference.WindowRect, true, isCycleDependent? _cycleDependentVisual : _mainVisual);
             }
         }
 
-        private void DrawCurveReferences(Rect start, Rect end, bool left, Color curveColor) {
+        private void DrawCurveReferences(Rect start, Rect end, bool left, NodeVisual visual) {
             var startPos = new Vector3(
                 left ? start.x + start.width : start.x,
                 start.y + start.height * 0.5f,
@@ -57,14 +83,16 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
             var endTan = endPos + Vector3.left * 50;
             
             for (var i = 1; i < 4; i++) {
-                var shadow = new Color32(50,55,35,(byte)Mathf.Clamp(i*30f, 0, 255));
+                var shadow = new Color32(visual.LineShadowColor.r,visual.LineShadowColor.g,visual.LineShadowColor.b,(byte)Mathf.Clamp(i*30f, 0, 255));
                 Handles.DrawBezier(startPos, endPos, startTan, endTan, shadow, null, i*2);
             }
             
-            //var shadow = new Color(0,0,0,0.3f);
-            //Handles.DrawBezier(startPos, endPos, startTan, endTan, shadow, null, 5);
-            
-            Handles.DrawBezier(startPos, endPos, startTan, endTan, curveColor, null, 3);
+            Handles.DrawBezier(startPos, endPos, startTan, endTan, visual.LineColor, null, 3);
+        }
+        
+        private struct NodeVisual {
+            public Color32 LineColor;
+            public Color32 LineShadowColor;
         }
     }
 }

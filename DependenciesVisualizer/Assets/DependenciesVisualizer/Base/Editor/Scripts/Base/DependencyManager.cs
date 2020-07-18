@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor.Compilation;
 using UnityEngine;
 
@@ -9,14 +10,16 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         public DependencyManager() {
             Nodes = new List<Node>();
             Nodes = new List<Node>();
-            var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.Player);
+            var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).
+                Where(assembly => !assembly.name.Contains("Unity"));
             
             foreach (var assembly in assemblies) {
                 Nodes.Add(new Node(assembly, Vector2.zero));
             }
 
             foreach (var node in Nodes) {
-                node.InjectReferences(GetInputNodes(node));
+                node.InjectInputReferences(GetInputNodes(node));
+                node.InjectOutputReferences(GetOutputNodes(node));
             }
         }
 
