@@ -22,7 +22,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         
         private void OnEnable() {
             _manager = new DependencyManager();
+            _manager.CreateNodes();
             _oldCommands = new Stack<ICommand>();
+            
+            SetNodePositionsByDependencies();
         }
 
         private void OnGUI() {
@@ -41,12 +44,26 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         private void DrawNodes() {
             for (var i = 0; i < _manager.Nodes.Count; i++) {
                 _manager.Nodes[i].Draw(i);
-                _manager.Nodes[i].DrawInputReferences();
+                _manager.Nodes[i].DrawOutputReferences();
             }
         }
 
         private void UserInput(Event e) {
             
+        }
+
+        private void SetNodePositionsByDependencies() {
+            var _amountOnLevel = new Dictionary<int, int>();
+            
+            foreach (var node in _manager.Nodes) {
+                var level = node.GetDependencyLevel(0);
+                if (!_amountOnLevel.ContainsKey(level)) {
+                    _amountOnLevel.Add(level, 0);
+                }
+
+                node.SetPosition(new Vector2(50 + _amountOnLevel[level] * 350, 50 + level * 160));
+                _amountOnLevel[level]++;
+            }
         }
     }
 }

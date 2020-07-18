@@ -6,15 +6,16 @@ using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
     public class Node {
-        public Rect WindowRect { get; private set; }
+        public Rect WindowRect;
 
         public Assembly Assembly { get; }
         private IList<Node> _inputDependencies;
         private IList<Node> _outputDependencies;
-        private static Vector2 _defaultSize = new Vector2(250, 100);
+        private static Vector2 _defaultSize = new Vector2(300, 100);
         private readonly string _windowTitle;
         private NodeVisual _mainVisual;
         private NodeVisual _cycleDependentVisual;
+        private int _row;
 
         public Node(Assembly assembly, Vector2 position) {
             Assembly = assembly;
@@ -32,6 +33,27 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
             };
         }
 
+        public void SetPosition(Vector2 position) {
+            WindowRect.position = position;
+        }
+
+        public int GetDependencyLevel(int startLevel) {
+            if (HaveInputDependencies()) {
+                startLevel++;
+                var bufLevel = startLevel;
+                foreach (var dependency in _inputDependencies) {
+                    var depLevel = dependency.GetDependencyLevel(startLevel);
+                    if (depLevel > bufLevel) {
+                        bufLevel = depLevel;
+                    }
+                }
+
+                startLevel = bufLevel;
+            }
+
+            return startLevel;
+        }
+
         public void InjectInputReferences(IList<Node> references) {
             _inputDependencies = references;
         }
@@ -39,7 +61,15 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         public void InjectOutputReferences(IList<Node> references) {
             _outputDependencies = references;
         }
+
+        public bool HaveInputDependencies() {
+            return _inputDependencies.Count > 0;
+        }
         
+        public bool HaveOutputDependencies() {
+            return _outputDependencies.Count > 0;
+        }
+
         public bool IsInput(Node node) {
             return _inputDependencies.Contains(node);
         }
@@ -60,27 +90,32 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
                 _windowTitle);
         }
 
-        public void DrawInputReferences() {
-            foreach (var reference in _inputDependencies) {
-                var isCycleDependent = IsOutput(reference);
-                DrawCurveReferences(WindowRect, reference.WindowRect, true, isCycleDependent? _cycleDependentVisual : _mainVisual);
+        public void DrawOutputReferences() {
+            foreach (var reference in _outputDependencies) {
+                var isCycleDependent = IsInput(reference);
+                DrawCurveReferences(WindowRect, reference.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual);
             }
         }
 
-        private void DrawCurveReferences(Rect start, Rect end, bool left, NodeVisual visual) {
+        public void SetRow(int row) {
+            _row = row;
+        }
+
+        private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual) {
             var startPos = new Vector3(
-                left ? start.x + start.width : start.x,
-                start.y + start.height * 0.5f,
+                start.x + start.width * 0.5f,
+                start.y + start.height,
                 0
             );
             var endPos = new Vector3(
                 end.x + end.width * 0.5f,
-                end.y + end.height * 0.5f,
+                end.y,
                 0
             );
 
-            var startTan = startPos + Vector3.right * 50;
-            var endTan = endPos + Vector3.left * 50;
+            var startTan = startPos + Vector3.up * 50;
+            var endTan = endPos + Vector3.down * 50;
+
             
             for (var i = 1; i < 4; i++) {
                 var shadow = new Color32(visual.LineShadowColor.r,visual.LineShadowColor.g,visual.LineShadowColor.b,(byte)Mathf.Clamp(i*30f, 0, 255));

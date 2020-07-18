@@ -9,7 +9,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
 
         public DependencyManager() {
             Nodes = new List<Node>();
-            Nodes = new List<Node>();
+        }
+
+        public void CreateNodes() {
             var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).
                 Where(assembly => !assembly.name.Contains("Unity"));
             
@@ -23,7 +25,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
             }
         }
 
-        public IList<Node> GetInputNodes(Node node) {
+        private IList<Node> GetOutputNodes(Node node) {
             var result = new List<Node>();
             
             foreach (var node1 in Nodes) {
@@ -35,7 +37,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
             return result;
         }
 
-        public IList<Node> GetOutputNodes(Node node) {
+        private IList<Node> GetInputNodes(Node node) {
             var result = new List<Node>();
             
             foreach (var node1 in Nodes) {
