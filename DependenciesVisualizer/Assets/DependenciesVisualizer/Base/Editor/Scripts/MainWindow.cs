@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
+using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,7 +15,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private Node _selectedNode;
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
-        private LayersWindow _layersWindow = new LayersWindow();
+        private LayersWindow _layersWindow;
+        private VisualizerPreferences _preferences;
 
         [MenuItem("Dependencies Visualizer/Show")]
         public static void Open() {
@@ -25,11 +27,18 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
         
         private void OnEnable() {
+            _preferences = new VisualizerPreferences();
+            _preferences.LoadPreference();
             _manager = new DependencyManager();
             _manager.CreateNodes();
             _oldCommands = new Stack<ICommand>();
+            _layersWindow = new LayersWindow(_preferences);
             
             SetNodePositionsByDependencies();
+        }
+
+        private void OnDisable() {
+            _preferences.SavePreference();
         }
 
         private void OnGUI() {

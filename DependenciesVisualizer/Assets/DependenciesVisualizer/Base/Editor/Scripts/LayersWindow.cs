@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
+using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class LayersWindow {
         private List<LayerData> _layers = new List<LayerData>();
+        private VisualizerPreferences _preferences;
+
+        public LayersWindow(VisualizerPreferences preferences) {
+            _preferences = preferences;
+        }
 
         public void Draw() {
             ReorderableListGUI.ListField<LayerData>(_layers, CustomListItem, DrawEmpty);
@@ -17,7 +23,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             if (itemValue is null) {
                 itemValue = new LayerData();
                 itemValue.Name = "Default_" + getPriorityByIndex;
-                itemValue.Color = Color.black;
+                itemValue.Color = _preferences.layerDefaultColor;
             }
             
             position.x = 50;
@@ -37,6 +43,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             position.x = 450;
             position.width = 100;
             itemValue.Color = EditorGUI.ColorField(position, itemValue.Color);
+            _preferences.layerDefaultColor = itemValue.Color;
             
             return itemValue;
         }
