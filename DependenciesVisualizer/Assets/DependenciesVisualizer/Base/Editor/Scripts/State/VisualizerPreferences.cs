@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -17,56 +18,62 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         public float dotSize = 0.1f;
 
         public bool showNormal = true;*/
-        public Color layerDefaultColor = new Color(147f / 255f, 244f / 255f, 66f / 255f);
-      //  public bool autoSave;
-		
-        public void LoadDefault() {
-            /*showBrushSize = true;
-            brushDetail = 18;
-            minBrushDrawSize = 0.5f;
-            brushColor = new Color(24f / 255f, 118f / 255f, 175f / 255f);
+        public Color layerDefaultColor;
 
-            showCentralDot = true;
-            dotSize = 0.1f;
+        public List<LayerData> layers;
+        //  public bool autoSave;
 
-            showNormal = true;*/
+        public VisualizerPreferences() {
             layerDefaultColor = new Color(147f / 255f, 244f / 255f, 66f / 255f);
+            layers = new List<LayerData>();
         }
-		
-        public bool LoadPreference(){
-            VisualizerPreferences  objXml = null;
 
-            string[] guids = AssetDatabase.FindAssets( "SceneEditorPref",null);
-            if (guids.Length >0){
-                string path = AssetDatabase.GUIDToAssetPath( guids[0]);
+        public void LoadDefaults() {
+            layers.Add(
+                new LayerData {
+                    Name = "Default",
+                    Color = layerDefaultColor,
+                    Priority = 0
+                });
+        }
 
-                Stream fs = new FileStream(path,FileMode.Open);
+        public bool LoadPreference() {
+            VisualizerPreferences objXml = null;
+
+            string[] guids = AssetDatabase.FindAssets("SceneEditorPref", null);
+            if (guids.Length > 0) {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+
+                Stream fs = new FileStream(path, FileMode.Open);
                 XmlSerializer serializer = new XmlSerializer(typeof(VisualizerPreferences));
 
-                objXml = (VisualizerPreferences)serializer.Deserialize( fs);
+                objXml = (VisualizerPreferences) serializer.Deserialize(fs);
                 fs.Close();
             }
 
-            if (objXml!=null) {
-                //autoSave = objXml.autoSave;
+            if (objXml != null) {
                 layerDefaultColor = objXml.layerDefaultColor;
+                layers = objXml.layers;
+
                 return true;
+            } else {
+                LoadDefaults();
             }
-            
+
             SavePreference();
             return false;
         }
 
-        public void SavePreference(){
-            string[] guids = AssetDatabase.FindAssets( "VisualizerPreferences",null);
-            string path = AssetDatabase.GUIDToAssetPath( guids[0]);
-            path = Path.GetDirectoryName( path) + "/SceneEditorPref.xml";
+        public void SavePreference() {
+            string[] guids = AssetDatabase.FindAssets("VisualizerPreferences", null);
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            path = Path.GetDirectoryName(path) + "/SceneEditorPref.xml";
             Stream fs = new FileStream(path, FileMode.Create);
             XmlWriter writer = new XmlTextWriter(fs, Encoding.Unicode);
             XmlSerializer serializer = new XmlSerializer(typeof(VisualizerPreferences));
             serializer.Serialize(writer, this);
-            writer.Close(); 
-		
+            writer.Close();
+
             AssetDatabase.Refresh();
         }
     }

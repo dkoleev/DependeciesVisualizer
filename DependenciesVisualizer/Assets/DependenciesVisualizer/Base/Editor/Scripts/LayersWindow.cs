@@ -11,6 +11,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
 
         public LayersWindow(VisualizerPreferences preferences) {
             _preferences = preferences;
+            _layers = _preferences.layers;
         }
 
         public void Draw() {
@@ -51,12 +52,5 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private void DrawEmpty() {
             GUILayout.Label("No items in list.", EditorStyles.miniLabel);
         }
-        
-    }
-
-    public class LayerData {
-        public string Name;
-        public string Priority;
-        public Color Color;
     }
 }
