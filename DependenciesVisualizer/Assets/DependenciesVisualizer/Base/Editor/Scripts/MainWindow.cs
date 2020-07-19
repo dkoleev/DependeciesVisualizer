@@ -14,8 +14,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private Node _selectedNode;
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
-        
-        private List<Test> _layers = new List<Test>();
+        private LayersWindow _layersWindow = new LayersWindow();
 
         [MenuItem("Dependencies Visualizer/Show")]
         public static void Open() {
@@ -38,14 +37,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             _mousePosition = e.mousePosition;
             UserInput(e);
             DrawWindows();
-            
-            ReorderableListGUI.ListField<Test>(_layers, CustomListItem, DrawEmpty);
-        }
-        
-        private class Test {
-            public string Name;
-            public string Priority;
-            public Color Color;
+            _layersWindow.Draw();
         }
 
         private void DrawWindows() {
@@ -175,42 +167,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 _amountOnLevel[level]++;
             }
         }
-        
-        
-        private Test CustomListItem(Rect position, Test itemValue) {
-            var getPriorityByIndex = _layers.FindIndex(test => test == itemValue);
-            
-            if (itemValue is null) {
-                itemValue = new Test();
-                itemValue.Name = "Default_" + getPriorityByIndex;
-                itemValue.Color = Color.black;
-            }
-            
-            position.x = 50;
-            position.width = 50;
-            EditorGUI.LabelField(position, "Name");
-            
 
-            position.width -= 50;
-            position.x = 100;
-            position.xMax = 300;
-            itemValue.Name = EditorGUI.TextField(position, itemValue.Name);
-            
-            position.x = 350;
-            position.width = 100;
-            EditorGUI.LabelField(position, "Priority: " + getPriorityByIndex);
-            
-            position.x = 450;
-            position.width = 100;
-            itemValue.Color = EditorGUI.ColorField(position, itemValue.Color);
-            
-            return itemValue;
-        }
-
-        private void DrawEmpty() {
-            GUILayout.Label("No items in list.", EditorStyles.miniLabel);
-        }
-        
         private void RemoveNode(Node node) {
             var command = new DeleteAssemblyCommand(node, _manager.Nodes);
             command.Execute();
