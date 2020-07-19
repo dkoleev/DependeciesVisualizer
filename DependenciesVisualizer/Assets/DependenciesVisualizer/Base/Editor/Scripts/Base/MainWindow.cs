@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
+using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
         
+        private List<string> _layers = new List<string>();
+
         [MenuItem("Dependencies Visualizer/Show")]
         public static void Open() {
             _editor = (MainWindow) GetWindow(typeof(MainWindow));
@@ -33,6 +36,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
             _mousePosition = e.mousePosition;
             UserInput(e);
             DrawWindows();
+            
+            ReorderableListGUI.ListField(_layers, CustomListItem, DrawEmpty);
         }
 
         private void DrawWindows() {
@@ -64,6 +69,18 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
                 node.SetPosition(new Vector2(50 + _amountOnLevel[level] * 350, 50 + level * 160));
                 _amountOnLevel[level]++;
             }
+        }
+        
+        
+        private string CustomListItem(Rect position, string itemValue) {
+            // Text fields do not like null values!
+            if (itemValue == null)
+                itemValue = "";
+            return EditorGUI.TextField(position, itemValue);
+        }
+
+        private void DrawEmpty() {
+            GUILayout.Label("No items in list.", EditorStyles.miniLabel);
         }
     }
 }
