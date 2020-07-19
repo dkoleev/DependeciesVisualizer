@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
@@ -14,7 +15,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
         
-        private List<string> _layers = new List<string>();
+        private List<Test> _layers = new List<Test>();
 
         [MenuItem("Dependencies Visualizer/Show")]
         public static void Open() {
@@ -38,7 +39,13 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             UserInput(e);
             DrawWindows();
             
-            ReorderableListGUI.ListField(_layers, CustomListItem, DrawEmpty);
+            ReorderableListGUI.ListField<Test>(_layers, CustomListItem, DrawEmpty);
+        }
+        
+        private class Test {
+            public string Name;
+            public string Priority;
+            public Color Color;
         }
 
         private void DrawWindows() {
@@ -170,11 +177,34 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
         
         
-        private string CustomListItem(Rect position, string itemValue) {
-            // Text fields do not like null values!
-            if (itemValue == null)
-                itemValue = "";
-            return EditorGUI.TextField(position, itemValue);
+        private Test CustomListItem(Rect position, Test itemValue) {
+            var getPriorityByIndex = _layers.FindIndex(test => test == itemValue);
+            
+            if (itemValue is null) {
+                itemValue = new Test();
+                itemValue.Name = "Default_" + getPriorityByIndex;
+                itemValue.Color = Color.black;
+            }
+            
+            position.x = 50;
+            position.width = 50;
+            EditorGUI.LabelField(position, "Name");
+            
+
+            position.width -= 50;
+            position.x = 100;
+            position.xMax = 300;
+            itemValue.Name = EditorGUI.TextField(position, itemValue.Name);
+            
+            position.x = 350;
+            position.width = 100;
+            EditorGUI.LabelField(position, "Priority: " + getPriorityByIndex);
+            
+            position.x = 450;
+            position.width = 100;
+            itemValue.Color = EditorGUI.ColorField(position, itemValue.Color);
+            
+            return itemValue;
         }
 
         private void DrawEmpty() {
