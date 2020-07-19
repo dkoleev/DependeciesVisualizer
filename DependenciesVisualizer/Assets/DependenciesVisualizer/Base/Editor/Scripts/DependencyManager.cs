@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
+namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class DependencyManager {
         public IList<Node> Nodes { get; }
 

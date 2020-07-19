@@ -1,12 +1,11 @@
 using System.Collections.Generic;
-using DependenciesVisualizer.Base.Editor.Scripts.Visual.Nodes;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.Commands {
     public class DeleteAssemblyCommand : ICommand {
-        private IList<BaseNode> _container;
-        private BaseNode _node;
+        private IList<Node> _container;
+        private Node _node;
         
-        public DeleteAssemblyCommand(BaseNode node, IList<BaseNode> container) {
+        public DeleteAssemblyCommand(Node node, IList<Node> container) {
             _container = container;
             _node = node;
         }

@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
+namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class Node {
         public Rect WindowRect;
 
@@ -124,7 +124,15 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Base {
             
             Handles.DrawBezier(startPos, endPos, startTan, endTan, visual.LineColor, null, 3);
         }
-        
+
+        public void Remove() {
+            
+        }
+
+        public void Restore() {
+            
+        }
+
         private struct NodeVisual {
             public Color32 LineColor;
             public Color32 LineShadowColor;
