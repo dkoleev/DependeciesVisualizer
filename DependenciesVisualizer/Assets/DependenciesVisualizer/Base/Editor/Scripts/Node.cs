@@ -19,6 +19,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private LayersWindow _layersWindow;
         private VisualizerPreferences _preferences;
         private NodeData _data;
+        private static Texture2D _backTexture;
 
         public Node(Assembly assembly, Vector2 position, LayersWindow layersWindow, NodeData data) {
             Assembly = assembly;
@@ -36,6 +37,14 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 LineColor = new Color32(150, 45, 45, 255),
                 LineShadowColor = new Color32(70,15,15,255)
             };
+
+            InitBackground();
+        }
+
+        private void InitBackground() {
+            _backTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
+            _backTexture.SetPixel(0, 0, new Color(0.25f, 0.4f, 0.25f));
+            _backTexture.Apply();
         }
 
         public void SetPosition(Vector2 position) {
@@ -88,6 +97,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         public void Draw(int id) {
+            GUI.backgroundColor = _layersWindow.Layers[_data.CurrentLayer].Color;
             WindowRect = GUI.Window(
                 id, 
                 WindowRect,
@@ -96,7 +106,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     GUI.DragWindow();
                 }, 
                 _windowTitle);
+            
+            GUI.backgroundColor = Color.white;
         }
+        
 
         private void DrawLayersPopup() {
             var newLayer = -1;

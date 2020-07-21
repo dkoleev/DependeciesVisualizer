@@ -3,6 +3,7 @@ using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class MainWindow : EditorWindow {
@@ -44,12 +45,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             _mousePosition = e.mousePosition;
             UserInput(e);
             DrawWindows();
-            _layersWindow.Draw();
         }
 
         private void DrawWindows() {
             BeginWindows();
             DrawNodes();
+            _layersWindow.Draw();
             EndWindows();
         }
 
