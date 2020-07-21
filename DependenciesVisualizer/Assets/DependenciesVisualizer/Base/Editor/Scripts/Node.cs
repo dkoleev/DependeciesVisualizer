@@ -134,8 +134,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual, Texture2D arrowTexture) {
+            var xOffset = start.position.x > end.position.x ? -10 : 10;
+
             var startPos = new Vector3(
-                start.x + start.width * 0.5f,
+                start.x + start.width * 0.5f + xOffset,
                 start.y + start.height,
                 0
             );
@@ -147,7 +149,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
 
             var startTan = startPos + Vector3.up * 75;
             var endTan = endPos + Vector3.down * 50;
-
+            
             
             for (var i = 1; i < 4; i++) {
                 var shadow = new Color32(visual.LineShadowColor.r,visual.LineShadowColor.g,visual.LineShadowColor.b,(byte)Mathf.Clamp(i*30f, 0, 255));
@@ -160,9 +162,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
 
         private void DrawArrow(Vector3 pos, Texture2D arrowTexture) {
             var color = GUI.color;
-            GUI.color = Handles.xAxisColor;// _mainVisual.LineColor;
+            GUI.color =  _mainVisual.LineColor; //Handles.xAxisColor;//
             var size = 12;
-            GUI.DrawTexture(new Rect(pos.x - size/ 2, pos.y, size, size), arrowTexture, ScaleMode.StretchToFill);
+            GUI.DrawTexture(new Rect(pos.x - size/2, pos.y - 2, size, size), arrowTexture, ScaleMode.StretchToFill);
             GUI.color = color;
         }
 
