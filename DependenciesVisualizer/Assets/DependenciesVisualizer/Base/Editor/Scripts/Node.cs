@@ -95,6 +95,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 WindowRect,
                 i => {
                     DrawLayersPopup();
+                    DrawInputOutputAmount();
                     GUI.DragWindow();
                 }, 
                 _windowTitle);
@@ -118,12 +119,19 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 }
             }
 
-
             _data.CurrentLayer = EditorGUILayout.Popup("Layer: ", _data.CurrentLayer, names.ToArray());
 
             if (newLayer != _data.CurrentLayer) {
                 _data.CurrentLayerName = _layersWindow.Layers[_data.CurrentLayer].Name;
             }
+        }
+
+        private void DrawInputOutputAmount() {
+            EditorGUI.LabelField(new Rect(10, WindowRect.height - 20, 100, 50), 
+                $"Input: {_inputDependencies.Count} Output: {_outputDependencies.Count}",
+                new GUIStyle {
+                    fontSize = 11
+                });
         }
 
         public void DrawOutputReferences(Texture2D arrowTexture) {
