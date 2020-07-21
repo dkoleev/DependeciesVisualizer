@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
-using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
@@ -29,10 +27,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private void OnEnable() {
             _preferences = new VisualizerPreferences();
             _preferences.LoadPreference();
-            _manager = new DependencyManager();
-            _manager.CreateNodes();
-            _oldCommands = new Stack<ICommand>();
             _layersWindow = new LayersWindow(_preferences);
+            _manager = new DependencyManager();
+            _manager.CreateNodes(_layersWindow, _preferences);
+            _oldCommands = new Stack<ICommand>();
             
             SetNodePositionsByDependencies();
         }

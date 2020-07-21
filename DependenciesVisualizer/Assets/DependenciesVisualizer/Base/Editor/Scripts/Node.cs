@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
@@ -15,13 +16,17 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private readonly string _windowTitle;
         private NodeVisual _mainVisual;
         private NodeVisual _cycleDependentVisual;
-        private int _row;
+        private LayersWindow _layersWindow;
+        private VisualizerPreferences _preferences;
+        private NodeData _data;
 
-        public Node(Assembly assembly, Vector2 position) {
+        public Node(Assembly assembly, Vector2 position, LayersWindow layersWindow, NodeData data) {
             Assembly = assembly;
+            _layersWindow = layersWindow;
+            _data = data;
             WindowRect = new Rect(position, _defaultSize);
             _windowTitle = Assembly.name;
-            
+
             _mainVisual = new NodeVisual {
                 LineColor = new Color32(90, 145, 60, 255),
                 LineShadowColor = new Color32(50,55,35,255)
@@ -85,9 +90,34 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         public void Draw(int id) {
             WindowRect = GUI.Window(
                 id, 
-                WindowRect, 
-                i => { GUI.DragWindow(); }, 
+                WindowRect,
+                i => {
+                    DrawLayersPopup();
+                    GUI.DragWindow();
+                }, 
                 _windowTitle);
+        }
+
+        private void DrawLayersPopup() {
+            var newLayer = -1;
+
+            var layers = _layersWindow.Layers.ToArray();
+            var names = new List<string>();
+            foreach (var layer in  layers) {
+                names.Add(layer.Name);
+
+                if (newLayer == -1 && layer.Name == _data.CurrentLayerName) {
+                    _data.CurrentLayer = layer.Priority;
+                    newLayer = _data.CurrentLayer;
+                }
+            }
+
+
+            _data.CurrentLayer = EditorGUILayout.Popup("Layer: ", _data.CurrentLayer, names.ToArray());
+
+            if (newLayer != _data.CurrentLayer) {
+                _data.CurrentLayerName = _layersWindow.Layers[_data.CurrentLayer].Name;
+            }
         }
 
         public void DrawOutputReferences() {
@@ -95,10 +125,6 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 var isCycleDependent = IsInput(reference);
                 DrawCurveReferences(WindowRect, reference.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual);
             }
-        }
-
-        public void SetRow(int row) {
-            _row = row;
         }
 
         private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual) {

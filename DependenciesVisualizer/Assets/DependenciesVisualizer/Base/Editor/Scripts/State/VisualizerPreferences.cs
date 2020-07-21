@@ -21,17 +21,19 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         public Color layerDefaultColor;
 
         public List<LayerData> layers;
+        public List<NodeData> nodes;
         //  public bool autoSave;
 
         public VisualizerPreferences() {
             layerDefaultColor = new Color(147f / 255f, 244f / 255f, 66f / 255f);
             layers = new List<LayerData>();
+            nodes = new List<NodeData>();
         }
 
         public void LoadDefaults() {
             layers.Add(
                 new LayerData {
-                    Name = "Default",
+                    Name = LayersWindow.DefaultLayerName,
                     Color = layerDefaultColor,
                     Priority = 0
                 });
@@ -54,6 +56,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
             if (objXml != null) {
                 layerDefaultColor = objXml.layerDefaultColor;
                 layers = objXml.layers;
+                nodes = objXml.nodes;
 
                 return true;
             } else {
