@@ -21,11 +21,11 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private NodeData _data;
         private static Texture2D _backTexture;
 
-        public Node(Assembly assembly, Vector2 position, LayersWindow layersWindow, NodeData data) {
+        public Node(Assembly assembly, LayersWindow layersWindow, NodeData data) {
             Assembly = assembly;
             _layersWindow = layersWindow;
             _data = data;
-            WindowRect = new Rect(position, _defaultSize);
+            WindowRect = new Rect(_data.Position, _defaultSize);
             _windowTitle = Assembly.name;
 
             _mainVisual = new NodeVisual {
@@ -48,6 +48,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         public void SetPosition(Vector2 position) {
+            _data.Position = position;
             WindowRect.position = position;
         }
 
@@ -107,6 +108,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 }, 
                 _windowTitle);
             
+            _data.Position = WindowRect.position;
             GUI.backgroundColor = Color.white;
         }
         

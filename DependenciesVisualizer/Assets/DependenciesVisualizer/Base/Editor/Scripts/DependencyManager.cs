@@ -27,12 +27,13 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     data = new NodeData {
                         NodeId = assembly.name,
                         CurrentLayer = layer.Priority,
-                        CurrentLayerName = layer.Name
+                        CurrentLayerName = layer.Name,
+                        Position = Vector2.zero
                     };
                     _nodesData.Add(data);
                 }
 
-                Nodes.Add(new Node(assembly, Vector2.zero, layersWindow, data));
+                Nodes.Add(new Node(assembly, layersWindow, data));
             }
 
             foreach (var node in Nodes) {

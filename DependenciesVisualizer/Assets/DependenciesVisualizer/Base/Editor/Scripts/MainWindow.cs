@@ -28,12 +28,16 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private void OnEnable() {
             _preferences = new VisualizerPreferences();
             _preferences.LoadPreference();
+            bool needSortNodes = _preferences.nodes.Count == 0;
+
             _layersWindow = new LayersWindow(_preferences);
             _manager = new DependencyManager();
             _manager.CreateNodes(_layersWindow, _preferences);
             _oldCommands = new Stack<ICommand>();
-            
-            SetNodePositionsByDependencies();
+
+            if (needSortNodes) {
+                SetNodePositionsByDependencies();
+            }
         }
 
         private void OnDisable() {
