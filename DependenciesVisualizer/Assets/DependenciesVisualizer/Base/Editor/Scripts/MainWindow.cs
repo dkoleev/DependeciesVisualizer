@@ -3,10 +3,11 @@ using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class MainWindow : EditorWindow {
+        [SerializeField] private Texture2D _arrowTexture;
+
         private  static MainWindow _editor;
         private Vector3 _mousePosition;
         private bool _makeTransition;
@@ -61,7 +62,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private void DrawNodes() {
             for (var i = 0; i < _manager.Nodes.Count; i++) {
                 _manager.Nodes[i].Draw(i);
-                _manager.Nodes[i].DrawOutputReferences();
+                _manager.Nodes[i].DrawOutputReferences(_arrowTexture);
             }
         }
 

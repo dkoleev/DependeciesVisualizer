@@ -19,7 +19,6 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private LayersWindow _layersWindow;
         private VisualizerPreferences _preferences;
         private NodeData _data;
-        private static Texture2D _backTexture;
 
         public Node(Assembly assembly, LayersWindow layersWindow, NodeData data) {
             Assembly = assembly;
@@ -37,14 +36,6 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 LineColor = new Color32(150, 45, 45, 255),
                 LineShadowColor = new Color32(70,15,15,255)
             };
-
-            InitBackground();
-        }
-
-        private void InitBackground() {
-            _backTexture = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            _backTexture.SetPixel(0, 0, new Color(0.25f, 0.4f, 0.25f));
-            _backTexture.Apply();
         }
 
         public void SetPosition(Vector2 position) {
@@ -135,14 +126,14 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
         }
 
-        public void DrawOutputReferences() {
+        public void DrawOutputReferences(Texture2D arrowTexture) {
             foreach (var reference in _outputDependencies) {
                 var isCycleDependent = IsInput(reference);
-                DrawCurveReferences(WindowRect, reference.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual);
+                DrawCurveReferences(WindowRect, reference.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual, arrowTexture);
             }
         }
 
-        private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual) {
+        private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual, Texture2D arrowTexture) {
             var startPos = new Vector3(
                 start.x + start.width * 0.5f,
                 start.y + start.height,
@@ -154,7 +145,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 0
             );
 
-            var startTan = startPos + Vector3.up * 50;
+            var startTan = startPos + Vector3.up * 75;
             var endTan = endPos + Vector3.down * 50;
 
             
@@ -164,6 +155,15 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
             
             Handles.DrawBezier(startPos, endPos, startTan, endTan, visual.LineColor, null, 3);
+            DrawArrow(startPos, arrowTexture);
+        }
+
+        private void DrawArrow(Vector3 pos, Texture2D arrowTexture) {
+            var color = GUI.color;
+            GUI.color = Handles.xAxisColor;// _mainVisual.LineColor;
+            var size = 12;
+            GUI.DrawTexture(new Rect(pos.x - size/ 2, pos.y, size, size), arrowTexture, ScaleMode.StretchToFill);
+            GUI.color = color;
         }
 
         public void Remove() {
