@@ -8,8 +8,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
         public Assembly Assembly { get; }
 
         public NodeData Data => _data;
-        public IList<Node> InputDependencies { get; private set; }
-        public IList<Node> OutputDependencies{ get; private set; }
+        public IList<Node> OutputDependencies { get; private set; }
+        public IList<Node> InputDependencies{ get; private set; }
         
         private NodeData _data;
         
@@ -18,29 +18,29 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
             _data = data;
         }
         
-        public void InjectInputReferences(IList<Node> references) {
-            InputDependencies = references;
-        }
-        
         public void InjectOutputReferences(IList<Node> references) {
             OutputDependencies = references;
         }
         
-        
-        public bool HaveInputDependencies() {
-            return InputDependencies.Count > 0;
+        public void InjectInputReferences(IList<Node> references) {
+            InputDependencies = references;
         }
+        
         
         public bool HaveOutputDependencies() {
             return OutputDependencies.Count > 0;
         }
-
-        public bool IsInput(Node nodeView) {
-            return InputDependencies.Contains(nodeView);
-        }
         
+        public bool HaveInputDependencies() {
+            return InputDependencies.Count > 0;
+        }
+
         public bool IsOutput(Node nodeView) {
             return OutputDependencies.Contains(nodeView);
+        }
+        
+        public bool IsInput(Node nodeView) {
+            return InputDependencies.Contains(nodeView);
         }
         
         public bool IsDependent(Node node) {
@@ -48,10 +48,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
         }
         
         public int GetDependencyLevel(int startLevel) {
-            if (HaveInputDependencies()) {
+            if (HaveOutputDependencies()) {
                 startLevel++;
                 var bufLevel = startLevel;
-                foreach (var dependency in InputDependencies) {
+                foreach (var dependency in OutputDependencies) {
                     var depLevel = dependency.GetDependencyLevel(startLevel);
                     if (depLevel > bufLevel) {
                         bufLevel = depLevel;

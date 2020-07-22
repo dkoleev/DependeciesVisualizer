@@ -33,18 +33,18 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
 
             foreach (var node in Nodes) {
-                node.InjectInputReferences(GetInputNodes(node));
                 node.InjectOutputReferences(GetOutputNodes(node));
+                node.InjectInputReferences(GetInputNodes(node));
             }
 
             return Nodes;
         }
 
-        private IList<Node> GetOutputNodes(Node nodeView) {
+        private IList<Node> GetInputNodes(Node node) {
             var result = new List<Node>();
             
             foreach (var node1 in Nodes) {
-                if (node1.IsDependent(nodeView)) {
+                if (node1.IsDependent(node)) {
                     result.Add(node1);
                 }
             }
@@ -52,11 +52,11 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             return result;
         }
 
-        private IList<Node> GetInputNodes(Node nodeView) {
+        private IList<Node> GetOutputNodes(Node node) {
             var result = new List<Node>();
             
             foreach (var node1 in Nodes) {
-                if (nodeView.IsDependent(node1)) {
+                if (node.IsDependent(node1)) {
                     result.Add(node1);
                 }
             }

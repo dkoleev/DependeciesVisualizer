@@ -92,8 +92,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         public void DrawOutputReferences(Texture2D arrowTexture) {
-            foreach (var reference in _model.OutputDependencies) {
-                var isCycleDependent = _model.IsInput(reference);
+            foreach (var reference in _model.InputDependencies) {
+                var isCycleDependent = _model.IsOutput(reference);
                 var view = _mainWindow.GetNodeViewByModel(reference);
                 DrawCurveReferences(WindowRect, view.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual, arrowTexture);
             }
