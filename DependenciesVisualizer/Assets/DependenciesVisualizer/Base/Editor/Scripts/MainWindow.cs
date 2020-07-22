@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
+using DependenciesVisualizer.Base.Editor.Scripts.Models;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
@@ -8,15 +10,16 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class MainWindow : EditorWindow {
         [SerializeField] private Texture2D _arrowTexture;
 
+        private IList<NodeView> _nodeViews;
         private  static MainWindow _editor;
         private Vector3 _mousePosition;
         private bool _makeTransition;
         private bool _clickedOnWindow;
-        private Node _selectedNode;
+        private NodeView _selectedNodeView;
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
         private LayersWindow _layersWindow;
-        private VisualizerPreferences _preferences;
+        private VisualizerState _state;
 
         [MenuItem("Dependencies Visualizer/Show")]
         public static void Open() {
@@ -27,13 +30,18 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
         
         private void OnEnable() {
-            _preferences = new VisualizerPreferences();
-            _preferences.LoadPreference();
-            bool needSortNodes = _preferences.nodes.Count == 0;
+            _nodeViews = new List<NodeView>();
+            _state = new VisualizerState();
+            _state.LoadPreference();
+            bool needSortNodes = _state.nodes.Count == 0;
 
-            _layersWindow = new LayersWindow(_preferences);
+            _layersWindow = new LayersWindow(_state);
             _manager = new DependencyManager();
-            _manager.CreateNodes(_layersWindow, _preferences);
+            var nodes = _manager.CreateNodes(_layersWindow, _state);
+            foreach (var node in nodes) {
+                _nodeViews.Add(new NodeView(this, _layersWindow, node));
+            }
+            
             _oldCommands = new Stack<ICommand>();
 
             if (needSortNodes) {
@@ -42,7 +50,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         private void OnDisable() {
-            _preferences.SavePreference();
+            _state.SavePreference();
         }
 
         private void OnGUI() {
@@ -60,14 +68,14 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         private void DrawNodes() {
-            for (var i = 0; i < _manager.Nodes.Count; i++) {
-                _manager.Nodes[i].Draw(i);
-                _manager.Nodes[i].DrawOutputReferences(_arrowTexture);
+            for (var i = 0; i < _nodeViews.Count; i++) {
+                _nodeViews[i].Draw(i);
+                _nodeViews[i].DrawOutputReferences(_arrowTexture);
             }
         }
 
         private void UserInput(Event e) {
-            if (e.type == EventType.MouseDown && !_makeTransition) {
+            if (e.type == EventType.MouseDown) {
                 switch (e.button) {
                     case 0:
                         LeftClick();
@@ -79,12 +87,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
 
             void RightClick() {
-                _selectedNode = null;
+                _selectedNodeView = null;
                 _clickedOnWindow = false;
-                foreach (var node in _manager.Nodes) {
+                foreach (var node in _nodeViews) {
                     if (node.WindowRect.Contains(e.mousePosition)) {
                         _clickedOnWindow = true;
-                        _selectedNode = node;
+                        _selectedNodeView = node;
                         break;
                     }
                 }
@@ -117,7 +125,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
 
         private void ModifyNode(Event e) {
             var menu = new GenericMenu();
-            if (_selectedNode is Node stateNode) {
+            if (_selectedNodeView is NodeView stateNode) {
                 var addTransitionName = "Add dependency";
                 menu.AddItem(new GUIContent(addTransitionName), false, ContextCallback, UserActions.AddDependency);
             }
@@ -136,8 +144,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                    // _nodes.Add(node);
                     break;
                 case UserActions.DeleteNode:
-                    if (_selectedNode != null) {
-                        RemoveNode(_selectedNode);
+                    if (_selectedNodeView != null) {
+                        RemoveNode(_selectedNodeView);
                     }
                     break;
                 case UserActions.AddDependency:
@@ -148,30 +156,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     break;
             }
         }
-        
-        /*private static void AddDependency(int index, Node from, Node to) {
-            var fromRect = from.WindowRect;
-            fromRect.x += 50;
-            var targetY = fromRect.y - fromRect.height;
-            if (!(from.CurrentState is null)) {
-                targetY += index * 100;
-            }
-
-            fromRect.y = targetY;
-            var transitionNode = CreateInstance<TransitionNode>();
-            transitionNode.Init(from, transition);
-            transitionNode.WindowRect = new Rect(fromRect.x + 200 + 100, fromRect.y + (fromRect.height * 0.7f), 200, 80);
-            transitionNode.WindowTitle = "Condition check";
-            _nodes.Add(transitionNode);
-
-            return transitionNode;
-        }*/
 
         private void SetNodePositionsByDependencies() {
             var _amountOnLevel = new Dictionary<int, int>();
             
-            foreach (var node in _manager.Nodes) {
-                var level = node.GetDependencyLevel(0);
+            foreach (var node in _nodeViews) {
+                var level = node.Model.GetDependencyLevel(0);
                 if (!_amountOnLevel.ContainsKey(level)) {
                     _amountOnLevel.Add(level, 0);
                 }
@@ -181,12 +171,22 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
         }
 
-        private void RemoveNode(Node node) {
-            var command = new DeleteAssemblyCommand(node, _manager.Nodes);
+        private void RemoveNode(NodeView nodeView) {
+            var command = new DeleteAssemblyCommand(nodeView, _nodeViews);
             command.Execute();
             _oldCommands.Push(command);
         }
-        
+
+        public NodeView GetNodeViewByModel(Node node) {
+            foreach (var view in _nodeViews) {
+                if (view.Model == node) {
+                    return view;
+                }
+            }
+
+            return null;
+        }
+
         private void UndoLastAction() {
             if (_oldCommands.Count == 0) {
                 return;

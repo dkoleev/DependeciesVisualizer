@@ -8,23 +8,12 @@ using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.State {
     [System.Serializable]
-    public class VisualizerPreferences {
-        /*public bool showBrushSize = true;
-        public int brushDetail = 18;
-        public float minBrushDrawSize = 0.5f;
-        public Color brushColor = new Color(24f / 255f, 118f / 255f, 175f / 255f);
-
-        public bool showCentralDot = true;
-        public float dotSize = 0.1f;
-
-        public bool showNormal = true;*/
+    public class VisualizerState {
         public Color layerDefaultColor;
-
         public List<LayerData> layers;
         public List<NodeData> nodes;
-        //  public bool autoSave;
 
-        public VisualizerPreferences() {
+        public VisualizerState() {
             layerDefaultColor = new Color(147f / 255f, 244f / 255f, 66f / 255f);
             layers = new List<LayerData>();
             nodes = new List<NodeData>();
@@ -40,16 +29,16 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         }
 
         public bool LoadPreference() {
-            VisualizerPreferences objXml = null;
+            VisualizerState objXml = null;
 
             string[] guids = AssetDatabase.FindAssets("SceneEditorPref", null);
             if (guids.Length > 0) {
                 string path = AssetDatabase.GUIDToAssetPath(guids[0]);
 
                 Stream fs = new FileStream(path, FileMode.Open);
-                XmlSerializer serializer = new XmlSerializer(typeof(VisualizerPreferences));
+                XmlSerializer serializer = new XmlSerializer(typeof(VisualizerState));
 
-                objXml = (VisualizerPreferences) serializer.Deserialize(fs);
+                objXml = (VisualizerState) serializer.Deserialize(fs);
                 fs.Close();
             }
 
@@ -68,12 +57,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         }
 
         public void SavePreference() {
-            string[] guids = AssetDatabase.FindAssets("VisualizerPreferences", null);
+            string[] guids = AssetDatabase.FindAssets("VisualizerState", null);
             string path = AssetDatabase.GUIDToAssetPath(guids[0]);
             path = Path.GetDirectoryName(path) + "/SceneEditorPref.xml";
             Stream fs = new FileStream(path, FileMode.Create);
             XmlWriter writer = new XmlTextWriter(fs, Encoding.Unicode);
-            XmlSerializer serializer = new XmlSerializer(typeof(VisualizerPreferences));
+            XmlSerializer serializer = new XmlSerializer(typeof(VisualizerState));
             serializer.Serialize(writer, this);
             writer.Close();
 

@@ -1,24 +1,21 @@
-using System;
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
-using ReorderableList = UnityEditorInternal.ReorderableList;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class LayersWindow {
         public const string DefaultLayerName = "Default";
         public List<LayerData> Layers => _layers;
-        private List<LayerData> _layers = new List<LayerData>();
-        private VisualizerPreferences _preferences;
-        
+        private readonly List<LayerData> _layers;
+        private readonly VisualizerState _state;
         private ReorderableList _layersList;
-        private ReorderableList list1;
 
-        public LayersWindow(VisualizerPreferences preferences) {
-            _preferences = preferences;
-            _layers = _preferences.layers;
+        public LayersWindow(VisualizerState state) {
+            _state = state;
+            _layers = _state.layers;
         }
 
         public void Draw() {
@@ -31,7 +28,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             if (itemValue is null) {
                 itemValue = new LayerData();
                 itemValue.Name = "Default_" + getPriorityByIndex;
-                itemValue.Color = _preferences.layerDefaultColor;
+                itemValue.Color = _state.layerDefaultColor;
             }
             
             position.x = 50;
@@ -52,7 +49,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             position.x = 450;
             position.width = 100;
             itemValue.Color = EditorGUI.ColorField(position, itemValue.Color);
-            _preferences.layerDefaultColor = itemValue.Color;
+            _state.layerDefaultColor = itemValue.Color;
             
             return itemValue;
         }

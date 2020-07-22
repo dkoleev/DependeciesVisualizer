@@ -1,31 +1,31 @@
 using System.Collections.Generic;
-using System.Linq;
+using DependenciesVisualizer.Base.Editor.Scripts.Models;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
-    public class Node {
+    public class NodeView {
         public Rect WindowRect;
+        public Node Model => _model;
 
-        public Assembly Assembly { get; }
-        private IList<Node> _inputDependencies;
-        private IList<Node> _outputDependencies;
         private static Vector2 _defaultSize = new Vector2(300, 100);
         private readonly string _windowTitle;
         private NodeVisual _mainVisual;
         private NodeVisual _cycleDependentVisual;
         private LayersWindow _layersWindow;
-        private VisualizerPreferences _preferences;
-        private NodeData _data;
+        private VisualizerState _state;
+        private Node _model;
+        private NodeData _data => _model.Data;
+        private MainWindow _mainWindow;
 
-        public Node(Assembly assembly, LayersWindow layersWindow, NodeData data) {
-            Assembly = assembly;
+        public NodeView(MainWindow mainWindow, LayersWindow layersWindow, Node model) {
+            _mainWindow = mainWindow;
             _layersWindow = layersWindow;
-            _data = data;
-            WindowRect = new Rect(_data.Position, _defaultSize);
-            _windowTitle = Assembly.name;
+            _model = model;
+            WindowRect = new Rect(model.Data.Position, _defaultSize);
+            _windowTitle = _model.Assembly.name;
 
             _mainVisual = new NodeVisual {
                 LineColor = new Color32(90, 145, 60, 255),
@@ -43,57 +43,14 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             WindowRect.position = position;
         }
 
-        public int GetDependencyLevel(int startLevel) {
-            if (HaveInputDependencies()) {
-                startLevel++;
-                var bufLevel = startLevel;
-                foreach (var dependency in _inputDependencies) {
-                    var depLevel = dependency.GetDependencyLevel(startLevel);
-                    if (depLevel > bufLevel) {
-                        bufLevel = depLevel;
-                    }
-                }
-
-                startLevel = bufLevel;
-            }
-
-            return startLevel;
-        }
-
-        public void InjectInputReferences(IList<Node> references) {
-            _inputDependencies = references;
-        }
-        
-        public void InjectOutputReferences(IList<Node> references) {
-            _outputDependencies = references;
-        }
-
-        public bool HaveInputDependencies() {
-            return _inputDependencies.Count > 0;
-        }
-        
-        public bool HaveOutputDependencies() {
-            return _outputDependencies.Count > 0;
-        }
-
-        public bool IsInput(Node node) {
-            return _inputDependencies.Contains(node);
-        }
-        
-        public bool IsOutput(Node node) {
-            return _outputDependencies.Contains(node);
-        }
-        
-        public bool IsDependent(Node node) {
-            return Assembly.assemblyReferences.Contains(node.Assembly);
-        }
-
         public void Draw(int id) {
             GUI.backgroundColor = _layersWindow.Layers[_data.CurrentLayer].Color;
             WindowRect = GUI.Window(
                 id, 
                 WindowRect,
                 i => {
+                    EditorGUILayout.Space();
+                    EditorGUILayout.Space();
                     DrawLayersPopup();
                     DrawInputOutputAmount();
                     GUI.DragWindow();
@@ -128,16 +85,17 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
 
         private void DrawInputOutputAmount() {
             EditorGUI.LabelField(new Rect(10, WindowRect.height - 20, 100, 50), 
-                $"Input: {_inputDependencies.Count} Output: {_outputDependencies.Count}",
+                $"Input: {_model.InputDependencies.Count} Output: {_model.OutputDependencies.Count}",
                 new GUIStyle {
                     fontSize = 11
                 });
         }
 
         public void DrawOutputReferences(Texture2D arrowTexture) {
-            foreach (var reference in _outputDependencies) {
-                var isCycleDependent = IsInput(reference);
-                DrawCurveReferences(WindowRect, reference.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual, arrowTexture);
+            foreach (var reference in _model.OutputDependencies) {
+                var isCycleDependent = _model.IsInput(reference);
+                var view = _mainWindow.GetNodeViewByModel(reference);
+                DrawCurveReferences(WindowRect, view.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual, arrowTexture);
             }
         }
 
