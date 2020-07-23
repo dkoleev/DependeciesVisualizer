@@ -1,8 +1,6 @@
 {
     "name": "Root1",
-    "references": [
-        "GUID:62af93aea60afa44696e48b07059cd91"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

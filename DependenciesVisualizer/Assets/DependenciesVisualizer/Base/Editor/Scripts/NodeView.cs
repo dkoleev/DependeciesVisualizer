@@ -99,7 +99,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 if (_model.Data.CurrentLayer >= reference.Data.CurrentLayer) {
                     DrawCurveReferences(WindowRect, view.WindowRect, _mainVisual, DependencyDirection.Down);
                 } else {
-                    DrawCurveReferences(view.WindowRect, WindowRect, _wrongDependentVisual, DependencyDirection.Up);
+                    DrawCurveReferences(WindowRect, view.WindowRect, _wrongDependentVisual, DependencyDirection.Down);
                 }
             }
         }
@@ -118,8 +118,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 0
             );
 
-            var startTan = startPos + Vector3.up * 50;
-            var endTan = endPos + Vector3.down * 90;
+            var startTan = startPos + Vector3.up * 25;
+            var endTan = endPos + Vector3.down * 75;
             
             
             for (var i = 1; i < 4; i++) {
