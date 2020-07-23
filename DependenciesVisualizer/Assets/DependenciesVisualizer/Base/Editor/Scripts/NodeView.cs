@@ -92,29 +92,29 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         public void DrawOutputReferences(Texture2D arrowTexture) {
-            foreach (var reference in _model.InputDependencies) {
-                var isCycleDependent = _model.IsOutput(reference);
+            foreach (var reference in _model.OutputDependencies) {
+                var isCycleDependent = _model.IsInput(reference);
                 var view = _mainWindow.GetNodeViewByModel(reference);
                 DrawCurveReferences(WindowRect, view.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual, arrowTexture);
             }
         }
 
         private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual, Texture2D arrowTexture) {
-            var xOffset = start.position.x > end.position.x ? -10 : 10;
+            var xOffset = start.position.x > end.position.x ? 10 : -10;
 
             var startPos = new Vector3(
-                start.x + start.width * 0.5f + xOffset,
+                start.x + start.width * 0.5f,
                 start.y + start.height,
                 0
             );
             var endPos = new Vector3(
-                end.x + end.width * 0.5f,
+                end.x + end.width * 0.5f + xOffset,
                 end.y,
                 0
             );
 
-            var startTan = startPos + Vector3.up * 75;
-            var endTan = endPos + Vector3.down * 50;
+            var startTan = startPos + Vector3.up * 50;
+            var endTan = endPos + Vector3.down * 90;
             
             
             for (var i = 1; i < 4; i++) {
@@ -123,14 +123,14 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
             
             Handles.DrawBezier(startPos, endPos, startTan, endTan, visual.LineColor, null, 3);
-            DrawArrow(startPos, arrowTexture);
+            DrawArrow(endPos, arrowTexture);
         }
 
         private void DrawArrow(Vector3 pos, Texture2D arrowTexture) {
             var color = GUI.color;
             GUI.color =  _mainVisual.LineColor; //Handles.xAxisColor;//
-            var size = 12;
-            GUI.DrawTexture(new Rect(pos.x - size/2, pos.y - 2, size, size), arrowTexture, ScaleMode.StretchToFill);
+            var size = 14;
+            GUI.DrawTexture(new Rect(pos.x - size/2, pos.y - 12, size, size), arrowTexture, ScaleMode.StretchToFill);
             GUI.color = color;
         }
 
