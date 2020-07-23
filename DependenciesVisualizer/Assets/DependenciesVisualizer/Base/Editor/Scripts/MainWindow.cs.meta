@@ -5,7 +5,11 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - m_ViewDataDictionary: {instanceID: 0}
-  - _arrowTexture: {fileID: 2800000, guid: 077db8b6a354f344b8e6d1d4dcae7c3f, type: 3}
+  - _arrowTextureUp: {fileID: 2800000, guid: f6dce14a3bd9b304cafaf7ec2fe0e1ff, type: 3}
+  - _arrowTextureDown: {fileID: 2800000, guid: 077db8b6a354f344b8e6d1d4dcae7c3f, type: 3}
+  - _arrowTextureLeft: {fileID: 2800000, guid: 04029007f42000000d029007f4200000, type: 3}
+  - _arrowTextureRight: {fileID: 2800000, guid: 63b607f47845b534d960e9bdf348b9ae,
+      type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

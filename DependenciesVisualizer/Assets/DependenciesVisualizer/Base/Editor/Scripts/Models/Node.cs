@@ -46,7 +46,11 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
         public bool IsDependent(Node node) {
             return Assembly.assemblyReferences.Contains(node.Assembly);
         }
-        
+
+        public bool HaveCycleReferences() {
+            return false;
+        }
+
         public int GetDependencyLevel(int startLevel) {
             if (HaveOutputDependencies()) {
                 startLevel++;

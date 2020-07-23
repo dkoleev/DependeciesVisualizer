@@ -4,6 +4,7 @@ using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class NodeView {
@@ -13,7 +14,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private static Vector2 _defaultSize = new Vector2(300, 100);
         private readonly string _windowTitle;
         private NodeVisual _mainVisual;
-        private NodeVisual _cycleDependentVisual;
+        private NodeVisual _wrongDependentVisual;
         private LayersWindow _layersWindow;
         private VisualizerState _state;
         private Node _model;
@@ -32,7 +33,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 LineShadowColor = new Color32(50,55,35,255)
             };
             
-            _cycleDependentVisual = new NodeVisual {
+            _wrongDependentVisual = new NodeVisual {
                 LineColor = new Color32(150, 45, 45, 255),
                 LineShadowColor = new Color32(70,15,15,255)
             };
@@ -91,15 +92,19 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 });
         }
 
-        public void DrawOutputReferences(Texture2D arrowTexture) {
+        public void DrawOutputReferences() {
             foreach (var reference in _model.OutputDependencies) {
-                var isCycleDependent = _model.IsInput(reference);
+               // var isCycleDependent = _model.IsInput(reference);
                 var view = _mainWindow.GetNodeViewByModel(reference);
-                DrawCurveReferences(WindowRect, view.WindowRect, isCycleDependent? _cycleDependentVisual : _mainVisual, arrowTexture);
+                if (_model.Data.CurrentLayer > reference.Data.CurrentLayer) {
+                    DrawCurveReferences(WindowRect, view.WindowRect, _mainVisual, DependencyDirection.Down);
+                } else {
+                    DrawCurveReferences(view.WindowRect, WindowRect, _wrongDependentVisual, DependencyDirection.Up);
+                }
             }
         }
 
-        private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual, Texture2D arrowTexture) {
+        private void DrawCurveReferences(Rect start, Rect end, NodeVisual visual, DependencyDirection direction) {
             var xOffset = start.position.x > end.position.x ? 10 : -10;
 
             var startPos = new Vector3(
@@ -123,14 +128,20 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
             
             Handles.DrawBezier(startPos, endPos, startTan, endTan, visual.LineColor, null, 3);
-            DrawArrow(endPos, arrowTexture);
+
+            var arrowSize = 14;
+            var arrowPosition = startPos + new Vector3(-arrowSize / 2, -2);
+            if (direction == DependencyDirection.Down) {
+                arrowPosition = endPos + new Vector3(-arrowSize/2, -12);
+            }
+
+            DrawArrow(arrowPosition, arrowSize, GetArrowByDirection(direction), visual);
         }
 
-        private void DrawArrow(Vector3 pos, Texture2D arrowTexture) {
+        private void DrawArrow(Vector3 pos, float size, Texture2D arrowTexture, NodeVisual visual) {
             var color = GUI.color;
-            GUI.color =  _mainVisual.LineColor; //Handles.xAxisColor;//
-            var size = 14;
-            GUI.DrawTexture(new Rect(pos.x - size/2, pos.y - 12, size, size), arrowTexture, ScaleMode.StretchToFill);
+            GUI.color =  visual.LineColor;
+            GUI.DrawTexture(new Rect(pos.x, pos.y, size, size), arrowTexture, ScaleMode.StretchToFill);
             GUI.color = color;
         }
 
@@ -145,6 +156,28 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private struct NodeVisual {
             public Color32 LineColor;
             public Color32 LineShadowColor;
+        }
+
+        private Texture2D GetArrowByDirection(DependencyDirection direction) {
+            switch (direction) {
+                case DependencyDirection.Up:
+                    return _mainWindow.ArrowUp;
+                case DependencyDirection.Down:
+                    return _mainWindow.ArrowDown;
+                case DependencyDirection.Left:
+                    return _mainWindow.ArrowLeft;
+                case DependencyDirection.Right:
+                    return _mainWindow.ArrowRight;
+            }
+
+            return null;
+        }
+
+        private enum DependencyDirection {
+            Up,
+            Down,
+            Left,
+            Right
         }
     }
 }

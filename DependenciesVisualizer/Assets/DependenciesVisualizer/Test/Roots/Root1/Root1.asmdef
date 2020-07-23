@@ -1,7 +1,7 @@
 {
-    "name": "Test1",
+    "name": "Root1",
     "references": [
-        "GUID:e76980f7dd58e244fb954f9a02ed6c6d"
+        "GUID:62af93aea60afa44696e48b07059cd91"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

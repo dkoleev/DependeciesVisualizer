@@ -1,5 +1,5 @@
+#pragma warning disable CS0649
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.Models;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
@@ -8,7 +8,15 @@ using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class MainWindow : EditorWindow {
-        [SerializeField] private Texture2D _arrowTexture;
+        [SerializeField] private Texture2D _arrowTextureUp;
+        [SerializeField] private Texture2D _arrowTextureDown;
+        [SerializeField] private Texture2D _arrowTextureLeft;
+        [SerializeField] private Texture2D _arrowTextureRight;
+
+        public Texture2D ArrowUp => _arrowTextureUp;
+        public Texture2D ArrowDown => _arrowTextureDown;
+        public Texture2D ArrowLeft => _arrowTextureLeft;
+        public Texture2D ArrowRight => _arrowTextureRight;
 
         private IList<NodeView> _nodeViews;
         private  static MainWindow _editor;
@@ -70,7 +78,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private void DrawNodes() {
             for (var i = 0; i < _nodeViews.Count; i++) {
                 _nodeViews[i].Draw(i);
-                _nodeViews[i].DrawOutputReferences(_arrowTexture);
+                _nodeViews[i].DrawOutputReferences();
             }
         }
 
