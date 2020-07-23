@@ -28,12 +28,13 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private DependencyManager _manager;
         private LayersWindow _layersWindow;
         private VisualizerState _state;
+        private static Vector2 _windowMinSize = new Vector2(800, 600);
 
         [MenuItem("Dependencies Visualizer/Show")]
         public static void Open() {
             _editor = (MainWindow) GetWindow(typeof(MainWindow));
             _editor.titleContent = new GUIContent("Dependencies Visualizer");
-            _editor.minSize = new Vector2(800, 600);
+            _editor.minSize = _windowMinSize;
             _editor.Show();
         }
         
@@ -174,7 +175,18 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     _amountOnLevel.Add(level, 0);
                 }
 
-                node.SetPosition(new Vector2(50 + _amountOnLevel[level] * 350, 50 + level * 160));
+                var minPosition = 150;
+                var maxPosition = _windowMinSize.x - 100;
+                var posY = maxPosition - (level * 160);
+
+                if (posY < minPosition) {
+                    posY = minPosition - level * 20;
+                    if (posY < 50) {
+                        posY = 50;
+                    }
+                }
+              
+                node.SetPosition(new Vector2(50 + _amountOnLevel[level] * 350, posY)); //-50 + level * 160
                 _amountOnLevel[level]++;
             }
         }

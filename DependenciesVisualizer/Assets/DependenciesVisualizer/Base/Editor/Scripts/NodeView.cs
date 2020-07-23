@@ -96,7 +96,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             foreach (var reference in _model.OutputDependencies) {
                // var isCycleDependent = _model.IsInput(reference);
                 var view = _mainWindow.GetNodeViewByModel(reference);
-                if (_model.Data.CurrentLayer > reference.Data.CurrentLayer) {
+                if (_model.Data.CurrentLayer >= reference.Data.CurrentLayer) {
                     DrawCurveReferences(WindowRect, view.WindowRect, _mainVisual, DependencyDirection.Down);
                 } else {
                     DrawCurveReferences(view.WindowRect, WindowRect, _wrongDependentVisual, DependencyDirection.Up);

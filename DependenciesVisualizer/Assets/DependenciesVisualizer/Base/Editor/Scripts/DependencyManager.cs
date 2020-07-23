@@ -27,6 +27,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                         CurrentLayerName = layer.Name,
                         Position = Vector2.zero
                     };
+                    state.nodes.Add(data);
                 }
 
                 Nodes.Add(new Node(assembly, data));
