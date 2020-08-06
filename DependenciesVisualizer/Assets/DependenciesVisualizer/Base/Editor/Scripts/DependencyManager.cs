@@ -8,19 +8,26 @@ using UnityEngine;
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class DependencyManager {
         public IList<Node> Nodes { get; }
-        
+        public VisualizerState State { get; }
+
         public DependencyManager() {
             Nodes = new List<Node>();
+            State = new VisualizerState();
         }
 
-        public ICollection<Node> CreateNodes(LayersWindow layersWindow, VisualizerState state) {
+        public void Initialize() {
+            State.LoadPreference();
+            CreateNodes(State);
+        }
+
+        private void CreateNodes(VisualizerState state) {
             var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).
                 Where(assembly => !assembly.name.Contains("Unity"));
             
             foreach (var assembly in assemblies) {
                 var data = state.nodes.FirstOrDefault(nodeData => nodeData.NodeId == assembly.name);
                 if (data is null) {
-                    var layer = layersWindow.Layers[0];
+                    var layer = state.layers[0];
                     data = new NodeData {
                         NodeId = assembly.name,
                         CurrentLayer = layer.Priority,
@@ -37,8 +44,6 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 node.InjectOutputReferences(GetOutputNodes(node));
                 node.InjectInputReferences(GetInputNodes(node));
             }
-
-            return Nodes;
         }
 
         private IList<Node> GetInputNodes(Node node) {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
 using DependenciesVisualizer.Base.Editor.Scripts.Models;
-using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEngine;
 
@@ -27,7 +26,6 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
         private LayersWindow _layersWindow;
-        private VisualizerState _state;
         private static Vector2 _windowMinSize = new Vector2(800, 600);
 
         [MenuItem("Dependencies Visualizer/Show")]
@@ -40,14 +38,13 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         
         private void OnEnable() {
             _nodeViews = new List<NodeView>();
-            _state = new VisualizerState();
-            _state.LoadPreference();
-            bool needSortNodes = _state.nodes.Count == 0;
-
-            _layersWindow = new LayersWindow(_state);
             _manager = new DependencyManager();
-            var nodes = _manager.CreateNodes(_layersWindow, _state);
-            foreach (var node in nodes) {
+            _manager.Initialize();
+          
+            bool needSortNodes = _manager.State.nodes.Count == 0;
+
+            _layersWindow = new LayersWindow(_manager.State);
+            foreach (var node in _manager.Nodes) {
                 _nodeViews.Add(new NodeView(this, _layersWindow, node));
             }
             
@@ -59,7 +56,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         private void OnDisable() {
-            _state.SavePreference();
+            _manager.State.SavePreference();
         }
 
         private void OnGUI() {

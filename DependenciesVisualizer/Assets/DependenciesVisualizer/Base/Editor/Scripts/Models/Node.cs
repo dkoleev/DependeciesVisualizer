@@ -51,6 +51,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
             return false;
         }
 
+        public bool IsCorrectDependency(Node node) {
+            return Data.CurrentLayer >= node.Data.CurrentLayer;
+        }
+
         public int GetDependencyLevel(int startLevel) {
             if (HaveOutputDependencies()) {
                 startLevel++;
