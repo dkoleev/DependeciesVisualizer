@@ -11,7 +11,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         public Rect WindowRect;
         public Node Model => _model;
 
-        private static Vector2 _defaultSize = new Vector2(300, 100);
+        private static Vector2 _defaultSize = new Vector2(140, 100);
         private readonly string _windowTitle;
         private NodeVisual _mainVisual;
         private NodeVisual _wrongDependentVisual;
@@ -25,8 +25,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             _mainWindow = mainWindow;
             _layersWindow = layersWindow;
             _model = model;
-            WindowRect = new Rect(model.Data.Position, _defaultSize);
             _windowTitle = _model.Assembly.name;
+            WindowRect = new Rect(model.Data.Position, new Vector2(_defaultSize.x + _windowTitle.Length*5, _defaultSize.y));
 
             _mainVisual = new NodeVisual {
                 LineColor = new Color32(90, 145, 60, 255),
@@ -50,13 +50,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 id, 
                 WindowRect,
                 i => {
-                    EditorGUILayout.Space();
-                    EditorGUILayout.Space();
+                    var style = new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter};
+                    EditorGUILayout.LabelField(_windowTitle,style, GUILayout.ExpandWidth(true));
                     DrawLayersPopup();
                     DrawInputOutputAmount();
                     GUI.DragWindow();
-                }, 
-                _windowTitle);
+                }, "");
             
             _data.Position = WindowRect.position;
             GUI.backgroundColor = Color.white;
@@ -77,7 +76,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 }
             }
 
-            _data.CurrentLayer = EditorGUILayout.Popup("Layer: ", _data.CurrentLayer, names.ToArray());
+            EditorGUILayout.BeginHorizontal();
+            SceneEditorGuiTools.SimpleText("Layer: ", 40);
+            _data.CurrentLayer = EditorGUILayout.Popup("", _data.CurrentLayer, names.ToArray(), GUILayout.MaxWidth(100));
+            EditorGUILayout.EndHorizontal();
 
             if (newLayer != _data.CurrentLayer) {
                 _data.CurrentLayerName = _layersWindow.Layers[_data.CurrentLayer].Name;
@@ -144,6 +146,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             GUI.DrawTexture(new Rect(pos.x, pos.y, size, size), arrowTexture, ScaleMode.StretchToFill);
             GUI.color = color;
         }
+
+        /*public Vector2 GetPositionForInput(NodeView nodeView) {
+            
+        }*/
 
         public void Remove() {
             
