@@ -12,9 +12,11 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         public Color layerDefaultColor;
         public List<LayerData> layers;
         public List<NodeData> nodes;
+        public Vector2 LayersWindowPosition;
 
         public VisualizerState() {
             layerDefaultColor = new Color(147f / 255f, 244f / 255f, 66f / 255f);
+            LayersWindowPosition = Vector2.zero;
             layers = new List<LayerData>();
             nodes = new List<NodeData>();
         }
@@ -44,6 +46,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
 
             if (objXml != null) {
                 layerDefaultColor = objXml.layerDefaultColor;
+                LayersWindowPosition = objXml.LayersWindowPosition;
                 layers = objXml.layers;
                 nodes = objXml.nodes;
 
