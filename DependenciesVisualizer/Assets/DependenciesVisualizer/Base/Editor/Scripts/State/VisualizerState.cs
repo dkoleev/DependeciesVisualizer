@@ -13,6 +13,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         public List<LayerData> layers;
         public List<AssemblyData> assemblies;
         public List<NodeData> nodes;
+        public List<NodeData> ignoredAssemblies;
         public Vector2 LayersWindowPosition;
         public Vector2 AssembliesWindowPosition;
 
@@ -23,6 +24,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
             layers = new List<LayerData>();
             assemblies = new List<AssemblyData>();
             nodes = new List<NodeData>();
+            ignoredAssemblies = new List<NodeData>();
         }
 
         public void LoadDefaults() {
@@ -53,6 +55,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
                 LayersWindowPosition = objXml.LayersWindowPosition;
                 layers = objXml.layers;
                 nodes = objXml.nodes;
+                ignoredAssemblies = objXml.ignoredAssemblies;
 
                 return true;
             } 

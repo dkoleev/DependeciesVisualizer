@@ -150,12 +150,14 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             var action = (UserActions) o;
             switch (action) {
                 case UserActions.AddNode:
-                    //var node = new StateNode(_mousePosition, BaseNode.DefaultSize, "State");
-                   // _nodes.Add(node);
+                    var node = _manager.AddNewNode(_mousePosition);
+                    _nodeViews.Add(new NodeView(this, _layersWindow, node));
                     break;
                 case UserActions.DeleteNode:
                     if (_selectedNodeView != null) {
-                        RemoveNode(_selectedNodeView);
+                        _manager.DeleteNode(_selectedNodeView.Model);
+                        _nodeViews.Remove(_selectedNodeView);
+                        // RemoveNode(_selectedNodeView);
                     }
                     break;
                 case UserActions.AddDependency:

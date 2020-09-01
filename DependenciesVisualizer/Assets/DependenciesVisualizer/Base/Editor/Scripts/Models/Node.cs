@@ -16,6 +16,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
         public Node(Assembly assembly, NodeData data) {
             Assembly = assembly;
             _data = data;
+            OutputDependencies = new List<Node>();
+            InputDependencies = new List<Node>();
         }
         
         public void InjectOutputReferences(IList<Node> references) {

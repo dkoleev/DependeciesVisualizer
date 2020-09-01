@@ -2,9 +2,7 @@ using System.Collections.Generic;
 using DependenciesVisualizer.Base.Editor.Scripts.Models;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
-using UnityEditor.Compilation;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class NodeView {
@@ -25,7 +23,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             _mainWindow = mainWindow;
             _layersWindow = layersWindow;
             _model = model;
-            _windowTitle = _model.Assembly.name;
+            _windowTitle = _model.Assembly == null ? "None" : _model.Assembly.name;
             WindowRect = new Rect(model.Data.Position, new Vector2(_defaultSize.x + _windowTitle.Length*5, _defaultSize.y));
 
             _mainVisual = new NodeVisual {

@@ -7,6 +7,7 @@ using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class DependencyManager {
+        public const string NodeEmptyId = "None";
         public IList<Node> Nodes { get; }
         public VisualizerState State { get; }
         public bool FirstRun { get; private set; }
@@ -24,7 +25,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private void CreateNodes(VisualizerState state) {
             var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).ToList();
                 //.Where(assembly => !assembly.name.Contains("Unity"));
-            state.nodes.RemoveAll(data =>  assemblies.FindAll(assembly => assembly.name == data.NodeId).Count == 0);
+            state.nodes.RemoveAll(data =>  assemblies.FindAll(assembly => assembly.name == data.NodeId).Count == 0 &&
+                                           data.NodeId != NodeEmptyId);
             
             foreach (var assembly in assemblies) {
                 var data = state.nodes.FirstOrDefault(nodeData => nodeData.NodeId == assembly.name);
@@ -39,12 +41,41 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     state.nodes.Add(data);
                 }
 
-                Nodes.Add(new Node(assembly, data));
+                if (state.ignoredAssemblies.FindAll(nodeData => nodeData.NodeId == data.NodeId).Count == 0) {
+                    Nodes.Add(new Node(assembly, data));
+                }
             }
-
             foreach (var node in Nodes) {
                 node.InjectOutputReferences(GetOutputNodes(node));
                 node.InjectInputReferences(GetInputNodes(node));
+            }
+
+            var noneNodes = state.nodes.FindAll(data => data.NodeId == NodeEmptyId);
+            foreach (var noneNode in noneNodes) {
+                Nodes.Add(new Node(null, noneNode));
+            }
+        }
+
+        public Node AddNewNode(Vector2 position) {
+            var layer = State.layers[0];
+            var data = new NodeData {
+                NodeId = NodeEmptyId,
+                CurrentLayer = layer.Priority,
+                CurrentLayerName = layer.Name,
+                Position = position
+            };
+            State.nodes.Add(data);
+            var node = new Node(null, data);
+            Nodes.Add(node);
+
+            return node;
+        }
+
+        public void DeleteNode(Node node) {
+            State.nodes.Remove(node.Data);
+            Nodes.Remove(node);
+            if (node.Data.NodeId != NodeEmptyId && State.ignoredAssemblies.FindAll(data => data.NodeId == node.Data.NodeId).Count == 0) {
+                State.ignoredAssemblies.Add(node.Data);
             }
         }
 
