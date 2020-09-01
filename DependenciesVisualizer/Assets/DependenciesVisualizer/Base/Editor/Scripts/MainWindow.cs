@@ -40,8 +40,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             _nodeViews = new List<NodeView>();
             _manager = new DependencyManager();
             _manager.Initialize();
-          
-            bool needSortNodes = _manager.State.nodes.Count == 0;
+
+            bool needSortNodes = _manager.FirstRun;
 
             _layersWindow = new LayersWindow(_manager.State);
             foreach (var node in _manager.Nodes) {

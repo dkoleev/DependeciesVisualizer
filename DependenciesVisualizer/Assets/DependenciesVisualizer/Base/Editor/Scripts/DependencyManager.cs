@@ -9,6 +9,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class DependencyManager {
         public IList<Node> Nodes { get; }
         public VisualizerState State { get; }
+        public bool FirstRun { get; private set; }
 
         public DependencyManager() {
             Nodes = new List<Node>();
@@ -16,7 +17,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         public void Initialize() {
-            State.LoadPreference();
+            FirstRun = !State.LoadPreference();
             CreateNodes(State);
         }
 

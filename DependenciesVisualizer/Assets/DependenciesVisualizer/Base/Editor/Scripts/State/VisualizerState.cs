@@ -51,10 +51,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
                 nodes = objXml.nodes;
 
                 return true;
-            } else {
-                LoadDefaults();
-            }
-
+            } 
+               
+            LoadDefaults();
             SavePreference();
             return false;
         }
