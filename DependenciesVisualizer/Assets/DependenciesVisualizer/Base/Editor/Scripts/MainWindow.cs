@@ -122,12 +122,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
          private void NodeContextMenu(Event e) {
             var menu = new GenericMenu();
          //   menu.AddSeparator("");
-            menu.AddItem(new GUIContent("Create Assembly"), false, ContextCallback,UserActions.AddNode);
-            if (_oldCommands.Count == 0) {
+            menu.AddItem(new GUIContent("Create Node"), false, ContextCallback,UserActions.AddNode);
+            /*if (_oldCommands.Count == 0) {
                 menu.AddDisabledItem(new GUIContent("Undo"), false);
             } else {
                 menu.AddItem(new GUIContent("Undo"), false, ContextCallback, UserActions.UndoLastAction);
-            }
+            }*/
             
             menu.ShowAsContext();
             e.Use();
@@ -135,12 +135,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
 
         private void ModifyNode(Event e) {
             var menu = new GenericMenu();
-            if (_selectedNodeView is NodeView stateNode) {
+            /*if (_selectedNodeView is NodeView stateNode) {
                 var addTransitionName = "Add dependency";
                 menu.AddItem(new GUIContent(addTransitionName), false, ContextCallback, UserActions.AddDependency);
-            }
+            }*/
 
-            menu.AddItem(new GUIContent("Delete"), false, ContextCallback, UserActions.DeleteNode);
+            menu.AddItem(new GUIContent("Delete Node"), false, ContextCallback, UserActions.DeleteNode);
 
             menu.ShowAsContext();
             e.Use();

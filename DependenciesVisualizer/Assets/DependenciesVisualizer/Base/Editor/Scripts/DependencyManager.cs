@@ -45,14 +45,19 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     Nodes.Add(new Node(assembly, data));
                 }
             }
-            foreach (var node in Nodes) {
-                node.InjectOutputReferences(GetOutputNodes(node));
-                node.InjectInputReferences(GetInputNodes(node));
-            }
+
+            UpdateNodeReferences();
 
             var noneNodes = state.nodes.FindAll(data => data.NodeId == NodeEmptyId);
             foreach (var noneNode in noneNodes) {
                 Nodes.Add(new Node(null, noneNode));
+            }
+        }
+
+        private void UpdateNodeReferences() {
+            foreach (var node in Nodes) {
+                node.InjectOutputReferences(GetOutputNodes(node));
+                node.InjectInputReferences(GetInputNodes(node));
             }
         }
 
@@ -77,6 +82,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             if (node.Data.NodeId != NodeEmptyId && State.ignoredAssemblies.FindAll(data => data.NodeId == node.Data.NodeId).Count == 0) {
                 State.ignoredAssemblies.Add(node.Data);
             }
+
+            UpdateNodeReferences();
         }
 
         private IList<Node> GetInputNodes(Node node) {
