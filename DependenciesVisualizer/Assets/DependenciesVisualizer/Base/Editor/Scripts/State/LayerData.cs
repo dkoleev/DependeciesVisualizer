@@ -7,4 +7,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         public int Priority;
         public Color Color;
     }
+    
+    [System.Serializable]
+    public class AssemblyData {
+        public string Name;
+    }
 }

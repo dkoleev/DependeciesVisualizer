@@ -22,8 +22,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         private void CreateNodes(VisualizerState state) {
-            var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).
-                Where(assembly => !assembly.name.Contains("Unity"));
+            var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).ToList();
+                //.Where(assembly => !assembly.name.Contains("Unity"));
+            state.nodes.RemoveAll(data =>  assemblies.FindAll(assembly => assembly.name == data.NodeId).Count == 0);
             
             foreach (var assembly in assemblies) {
                 var data = state.nodes.FirstOrDefault(nodeData => nodeData.NodeId == assembly.name);

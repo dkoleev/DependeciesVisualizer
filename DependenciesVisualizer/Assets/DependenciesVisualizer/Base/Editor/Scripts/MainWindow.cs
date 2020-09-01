@@ -26,6 +26,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private Stack<ICommand> _oldCommands;
         private DependencyManager _manager;
         private LayersWindow _layersWindow;
+        private AssembliesWindow _assembliesWindow;
         private static Vector2 _windowMinSize = new Vector2(800, 600);
 
         [MenuItem("Dependencies Visualizer/Show")]
@@ -44,6 +45,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             bool needSortNodes = _manager.FirstRun;
 
             _layersWindow = new LayersWindow(_manager.State);
+            _assembliesWindow = new AssembliesWindow(_manager.State);
+            
             foreach (var node in _manager.Nodes) {
                 _nodeViews.Add(new NodeView(this, _layersWindow, node));
             }
@@ -70,6 +73,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             BeginWindows();
             DrawNodes();
             _layersWindow.Draw();
+           // _assembliesWindow.Draw();
             EndWindows();
         }
 

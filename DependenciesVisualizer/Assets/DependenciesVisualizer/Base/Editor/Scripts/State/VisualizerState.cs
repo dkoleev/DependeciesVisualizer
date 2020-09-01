@@ -11,13 +11,17 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
     public class VisualizerState {
         public Color layerDefaultColor;
         public List<LayerData> layers;
+        public List<AssemblyData> assemblies;
         public List<NodeData> nodes;
         public Vector2 LayersWindowPosition;
+        public Vector2 AssembliesWindowPosition;
 
         public VisualizerState() {
             layerDefaultColor = new Color(147f / 255f, 244f / 255f, 66f / 255f);
             LayersWindowPosition = Vector2.zero;
+            AssembliesWindowPosition = new Vector2(500, 0);
             layers = new List<LayerData>();
+            assemblies = new List<AssemblyData>();
             nodes = new List<NodeData>();
         }
 
