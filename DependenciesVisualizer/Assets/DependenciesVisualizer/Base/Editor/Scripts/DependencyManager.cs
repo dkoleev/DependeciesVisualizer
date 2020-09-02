@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
     public class DependencyManager {
-        public const string NodeEmptyId = "None";
         public IList<Node> Nodes { get; }
         public VisualizerState State { get; }
         public bool FirstRun { get; private set; }
+        public List<Assembly> Assemblies { get; private set; }
 
         public DependencyManager() {
             Nodes = new List<Node>();
@@ -23,12 +23,11 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         private void CreateNodes(VisualizerState state) {
-            var assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).ToList();
+            Assemblies = CompilationPipeline.GetAssemblies(AssembliesType.PlayerWithoutTestAssemblies).ToList();
                 //.Where(assembly => !assembly.name.Contains("Unity"));
-            state.nodes.RemoveAll(data =>  assemblies.FindAll(assembly => assembly.name == data.NodeId).Count == 0 &&
-                                           data.NodeId != NodeEmptyId);
+            state.nodes.RemoveAll(data =>  Assemblies.FindAll(assembly => assembly.name == data.NodeId).Count == 0);
             
-            foreach (var assembly in assemblies) {
+            foreach (var assembly in Assemblies) {
                 var data = state.nodes.FirstOrDefault(nodeData => nodeData.NodeId == assembly.name);
                 if (data is null) {
                     var layer = state.layers[0];
@@ -47,14 +46,9 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             }
 
             UpdateNodeReferences();
-
-            var noneNodes = state.nodes.FindAll(data => data.NodeId == NodeEmptyId);
-            foreach (var noneNode in noneNodes) {
-                Nodes.Add(new Node(null, noneNode));
-            }
         }
 
-        private void UpdateNodeReferences() {
+        public void UpdateNodeReferences() {
             foreach (var node in Nodes) {
                 node.InjectOutputReferences(GetOutputNodes(node));
                 node.InjectInputReferences(GetInputNodes(node));
@@ -62,16 +56,25 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         }
 
         public Node AddNewNode(Vector2 position) {
+            var assemblies = GetNotUsedAssemblies();
+            if (assemblies.Count == 0) {
+                return null;
+            }
+
+            var assembly = assemblies[0];
             var layer = State.layers[0];
             var data = new NodeData {
-                NodeId = NodeEmptyId,
+                NodeId = assembly.name,
                 CurrentLayer = layer.Priority,
                 CurrentLayerName = layer.Name,
                 Position = position
             };
             State.nodes.Add(data);
-            var node = new Node(null, data);
+            var node = new Node(assembly, data);
             Nodes.Add(node);
+            State.ignoredAssemblies.RemoveAll(nodeData => nodeData.NodeId == data.NodeId);
+            State.SavePreference();
+            UpdateNodeReferences();
 
             return node;
         }
@@ -79,11 +82,26 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         public void DeleteNode(Node node) {
             State.nodes.Remove(node.Data);
             Nodes.Remove(node);
-            if (node.Data.NodeId != NodeEmptyId && State.ignoredAssemblies.FindAll(data => data.NodeId == node.Data.NodeId).Count == 0) {
+            if (State.ignoredAssemblies.FindAll(data => data.NodeId == node.Data.NodeId).Count == 0) {
                 State.ignoredAssemblies.Add(node.Data);
             }
 
             UpdateNodeReferences();
+            State.SavePreference();
+        }
+
+        public List<Assembly> GetNotUsedAssemblies() {
+            return Assemblies.Where(assembly => !AssemblyIsVisualize(assembly)).ToList();
+        }
+
+        public bool AssemblyIsVisualize(Assembly assembly) {
+            foreach (var node in Nodes) {
+                if (node.Assembly == assembly) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private IList<Node> GetInputNodes(Node node) {

@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using DependenciesVisualizer.Base.Editor.Scripts.Models;
 using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts {
@@ -10,7 +12,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         public Node Model => _model;
 
         private static Vector2 _defaultSize = new Vector2(140, 100);
-        private readonly string _windowTitle;
+        private string _windowTitle;
         private NodeVisual _mainVisual;
         private NodeVisual _wrongDependentVisual;
         private LayersWindow _layersWindow;
@@ -18,13 +20,15 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         private Node _model;
         private NodeData _data => _model.Data;
         private MainWindow _mainWindow;
+        private int _assemblyIndex = 0;
 
         public NodeView(MainWindow mainWindow, LayersWindow layersWindow, Node model) {
             _mainWindow = mainWindow;
             _layersWindow = layersWindow;
             _model = model;
-            _windowTitle = _model.Assembly == null ? "None" : _model.Assembly.name;
-            WindowRect = new Rect(model.Data.Position, new Vector2(_defaultSize.x + _windowTitle.Length*5, _defaultSize.y));
+            _windowTitle = _model.Assembly.name;
+
+            UpdateWindowSize();
 
             _mainVisual = new NodeVisual {
                 LineColor = new Color32(90, 145, 60, 255),
@@ -35,6 +39,10 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 LineColor = new Color32(150, 45, 45, 255),
                 LineShadowColor = new Color32(70,15,15,255)
             };
+        }
+
+        private void UpdateWindowSize() {
+            WindowRect = new Rect(_model.Data.Position, new Vector2(_defaultSize.x + _windowTitle.Length*4, _defaultSize.y));
         }
 
         public void SetPosition(Vector2 position) {
@@ -48,8 +56,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                 id, 
                 WindowRect,
                 i => {
-                    var style = new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter};
-                    EditorGUILayout.LabelField(_windowTitle,style, GUILayout.ExpandWidth(true));
+                    /*var style = new GUIStyle(GUI.skin.label) {alignment = TextAnchor.MiddleCenter};
+                    EditorGUILayout.LabelField(_windowTitle,style, GUILayout.ExpandWidth(true));*/
                     DrawLayersPopup();
                     DrawInputOutputAmount();
                     GUI.DragWindow();
@@ -59,10 +67,8 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             GUI.backgroundColor = Color.white;
         }
         
-
         private void DrawLayersPopup() {
             var newLayer = -1;
-
             var layers = _layersWindow.Layers.ToArray();
             var names = new List<string>();
             foreach (var layer in  layers) {
@@ -72,6 +78,22 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
                     _data.CurrentLayer = layer.Priority;
                     newLayer = _data.CurrentLayer;
                 }
+            }
+
+            var assembliesToShow = new List<Assembly> {
+                _model.Assembly
+            };
+            assembliesToShow.AddRange(_mainWindow.DependencyManager.GetNotUsedAssemblies());
+            
+            var assemblyNames = new List<string>();
+            assembliesToShow.ForEach(assembly => assemblyNames.Add(assembly.name));
+            _assemblyIndex = EditorGUILayout.Popup("", _assemblyIndex, assemblyNames.ToArray(), GUILayout.Height(25));
+            if (_assemblyIndex != 0) {
+                _model.SetAssembly(assembliesToShow[_assemblyIndex]);
+                _mainWindow.DependencyManager.UpdateNodeReferences();
+                _windowTitle = _model.Data.NodeId;
+                UpdateWindowSize();
+                _assemblyIndex = 0;
             }
 
             EditorGUILayout.BeginHorizontal();

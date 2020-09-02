@@ -5,7 +5,7 @@ using UnityEditor.Compilation;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
     public class Node {
-        public Assembly Assembly { get; }
+        public Assembly Assembly { get; private set; }
 
         public NodeData Data => _data;
         public IList<Node> OutputDependencies { get; private set; }
@@ -19,7 +19,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
             OutputDependencies = new List<Node>();
             InputDependencies = new List<Node>();
         }
-        
+
+        public void SetAssembly(Assembly assembly) {
+            Assembly = assembly;
+            _data.NodeId = assembly.name;
+        }
+
         public void InjectOutputReferences(IList<Node> references) {
             OutputDependencies = references;
         }

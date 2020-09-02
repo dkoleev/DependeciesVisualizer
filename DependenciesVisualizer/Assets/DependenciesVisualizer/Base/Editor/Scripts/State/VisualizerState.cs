@@ -30,9 +30,15 @@ namespace DependenciesVisualizer.Base.Editor.Scripts.State {
         public void LoadDefaults() {
             layers.Add(
                 new LayerData {
-                    Name = LayersWindow.DefaultLayerName,
+                    Name = "Core",
                     Color = layerDefaultColor,
                     Priority = 0
+                });
+            layers.Add(
+                new LayerData {
+                    Name = "UI",
+                    Color = new Color(67f / 255f, 153f / 255f, 244f / 255f),
+                    Priority = 1
                 });
         }
 

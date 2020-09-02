@@ -11,6 +11,7 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
         [SerializeField] private Texture2D _arrowTextureDown;
         [SerializeField] private Texture2D _arrowTextureLeft;
         [SerializeField] private Texture2D _arrowTextureRight;
+        public DependencyManager DependencyManager => _manager;
 
         public Texture2D ArrowUp => _arrowTextureUp;
         public Texture2D ArrowDown => _arrowTextureDown;
@@ -122,7 +123,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
          private void NodeContextMenu(Event e) {
             var menu = new GenericMenu();
          //   menu.AddSeparator("");
-            menu.AddItem(new GUIContent("Create Node"), false, ContextCallback,UserActions.AddNode);
+         var title = "Create Node";
+         if (_manager.GetNotUsedAssemblies().Count == 0) {
+             title = "All assemblies is used";
+         }
+
+         menu.AddItem(new GUIContent(title), false, ContextCallback,UserActions.AddNode);
             /*if (_oldCommands.Count == 0) {
                 menu.AddDisabledItem(new GUIContent("Undo"), false);
             } else {
@@ -151,7 +157,12 @@ namespace DependenciesVisualizer.Base.Editor.Scripts {
             switch (action) {
                 case UserActions.AddNode:
                     var node = _manager.AddNewNode(_mousePosition);
-                    _nodeViews.Add(new NodeView(this, _layersWindow, node));
+                    if (node != null) {
+                        _nodeViews.Add(new NodeView(this, _layersWindow, node));
+                    } else {
+                        //all assemblies is used
+                    }
+
                     break;
                 case UserActions.DeleteNode:
                     if (_selectedNodeView != null) {
