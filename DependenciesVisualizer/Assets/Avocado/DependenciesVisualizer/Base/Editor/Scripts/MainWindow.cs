@@ -1,11 +1,12 @@
 #pragma warning disable CS0649
 using System.Collections.Generic;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts.Models;
+using DependenciesVisualizer.Base.Editor.Scripts;
 using DependenciesVisualizer.Base.Editor.Scripts.Commands;
-using DependenciesVisualizer.Base.Editor.Scripts.Models;
 using UnityEditor;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts {
+namespace Avocado.DependenciesVisualizer.Base.Editor.Scripts {
     public class MainWindow : EditorWindow {
         [SerializeField] private Texture2D _arrowTextureUp;
         [SerializeField] private Texture2D _arrowTextureDown;

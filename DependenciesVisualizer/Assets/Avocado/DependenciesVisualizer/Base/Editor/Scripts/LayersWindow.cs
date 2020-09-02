@@ -1,11 +1,11 @@
 using System.Collections.Generic;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts.State;
 using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
-using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts {
+namespace Avocado.DependenciesVisualizer.Base.Editor.Scripts {
     public class LayersWindow {
         public const string DefaultLayerName = "Default";
         public List<LayerData> Layers => _layers;

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts;
 
 namespace DependenciesVisualizer.Base.Editor.Scripts.Commands {
     public class DeleteAssemblyCommand : ICommand {

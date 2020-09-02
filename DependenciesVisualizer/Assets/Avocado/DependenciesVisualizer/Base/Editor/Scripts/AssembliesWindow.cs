@@ -1,12 +1,12 @@
 using System.Collections.Generic;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts.State;
 using DependenciesVisualizer.Base.Editor.Scripts.ReorderList;
-using DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts {
+namespace Avocado.DependenciesVisualizer.Base.Editor.Scripts {
     public class AssembliesWindow {
         private readonly List<AssemblyData> _assemblies;
         private readonly VisualizerState _state;

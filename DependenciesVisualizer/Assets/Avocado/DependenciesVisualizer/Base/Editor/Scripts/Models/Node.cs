@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using DependenciesVisualizer.Base.Editor.Scripts.State;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts.State;
 using UnityEditor.Compilation;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts.Models {
+namespace Avocado.DependenciesVisualizer.Base.Editor.Scripts.Models {
     public class Node {
         public Assembly Assembly { get; private set; }
 

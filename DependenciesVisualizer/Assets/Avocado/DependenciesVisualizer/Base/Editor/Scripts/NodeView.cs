@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using System.Linq;
-using DependenciesVisualizer.Base.Editor.Scripts.Models;
-using DependenciesVisualizer.Base.Editor.Scripts.State;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts.Models;
+using Avocado.DependenciesVisualizer.Base.Editor.Scripts.State;
+using DependenciesVisualizer.Base.Editor;
 using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor.Scripts {
+namespace Avocado.DependenciesVisualizer.Base.Editor.Scripts {
     public class NodeView {
         public Rect WindowRect;
         public Node Model => _model;

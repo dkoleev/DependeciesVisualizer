@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace DependenciesVisualizer.Base.Editor {
+namespace Avocado.DependenciesVisualizer.Base.Editor {
     public static class SceneEditorGuiTools {
         public static void SimpleText(string text, int maxWidth = 100) {
             var labelStyle = new GUIStyle("label");

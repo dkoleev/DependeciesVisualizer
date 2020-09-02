@@ -1,4 +1,4 @@
-namespace DependenciesVisualizer.Base.Editor.Scripts {
+namespace Avocado.DependenciesVisualizer.Base.Editor.Scripts {
     public enum UserActions {
         AddNode,
         DeleteNode,
